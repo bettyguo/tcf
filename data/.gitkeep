@@ -1,0 +1,3 @@
+# This file is the ONLY file ever committed under data/.
+# Everything else under data/ is gitignored on purpose.
+# See master prompt §6.3, RISK_REGISTER R-006, scripts/check_no_data_commit.py.

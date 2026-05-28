@@ -1,0 +1,9 @@
+// markdownlint-cli2 config. Pragmatic defaults; we prefer readability over strict rules.
+{
+  "default": true,
+  "MD013": false,        // line-length: prose flows freely
+  "MD024": { "siblings_only": true }, // duplicate headings: allowed across sections
+  "MD033": false,        // inline HTML: we use <details> + badges
+  "MD041": false,        // first line should be a top-level heading (badges first is fine)
+  "MD046": { "style": "fenced" }
+}

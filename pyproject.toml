@@ -1,0 +1,184 @@
+# tcf-accel — workspace root
+# uv workspace per ADR-0001. Per-package pyprojects live under apps/* and packages/*.
+# Master prompt §8: Python 3.12, ruff, mypy, pytest, hypothesis as defaults.
+
+[project]
+name = "tcf-accel-workspace"
+version = "0.1.0"
+description = "Workspace root for tcf-accel. Not installable; declares dev tooling and workspace members."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+authors = [{ name = "tcf-accel contributors" }]
+keywords = ["tcf-canada", "nclc", "cefr", "french", "sla", "language-learning"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Education",
+    "Private :: Do Not Upload",
+]
+# This package is intentionally empty; runtime deps live in member packages/apps.
+dependencies = []
+
+[dependency-groups]
+# Single dev group consumed by `uv sync --all-extras --all-packages`.
+# Phase 1 keeps this lean; later phases add their own dev-tools via member pyprojects.
+dev = [
+    # Lint / format / type
+    "ruff>=0.6,<1.0",
+    "mypy>=1.11,<2.0",
+    # Test
+    "pytest>=8.3,<9.0",
+    "pytest-asyncio>=0.24,<1.0",
+    "pytest-cov>=5.0,<6.0",
+    "hypothesis>=6.112,<7.0",
+    # Pre-commit
+    "pre-commit>=3.8,<5.0",
+    # Security audits (Phase 1 audit-security target)
+    "pip-audit>=2.7,<3.0",
+    "bandit[toml]>=1.7,<2.0",
+]
+
+[tool.uv]
+package = false                          # workspace root is not a published package
+
+[tool.uv.workspace]
+members = [
+    "apps/api",
+    "apps/worker",
+    "packages/shared",
+    "packages/sla",
+    "packages/ml",
+    "packages/content",
+]
+
+[tool.uv.sources]
+# Workspace path deps. Consumed by member pyprojects via `tcf-accel-shared = { workspace = true }`.
+tcf-accel-shared  = { workspace = true }
+tcf-accel-sla     = { workspace = true }
+tcf-accel-ml      = { workspace = true }
+tcf-accel-content = { workspace = true }
+
+# ─── Ruff (lint + format) ──────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "node_modules", "data", "infra/migrations/versions"]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",        # pycodestyle / pyflakes
+    "I",                  # isort
+    "UP",                 # pyupgrade
+    "B",                  # flake8-bugbear
+    "C4",                 # flake8-comprehensions
+    "SIM",                # flake8-simplify
+    "PERF",               # perflint
+    "RUF",                # ruff-specific
+    "PL",                 # pylint subset
+    "D",                  # pydocstyle (we want public docstrings; master prompt §5.3)
+    "ANN",                # type annotations
+    "S",                  # bandit-equivalent rules
+    "TID",                # tidy imports
+    "PTH",                # use pathlib
+]
+ignore = [
+    "D203",               # 1 blank line before class — conflicts with D211
+    "D213",               # multi-line summary on second line — conflicts with D212
+    "PLR0913",            # too many arguments — sometimes needed; case-by-case
+    "ANN401",             # `Any` is occasionally fine in generic helpers
+    "S101",               # assert in tests is fine
+    "PLR2004",            # magic values in tests are fine
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*"             = ["D", "ANN", "S", "PLR"]
+"**/tests/**/*"          = ["D", "ANN", "S", "PLR"]
+"scripts/**/*"           = ["D100", "D103", "ANN"]
+"apps/*/src/**/migrations/**/*" = ["ALL"]   # Alembic revision files
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+# ─── Mypy ──────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+show_error_codes = true
+show_column_numbers = true
+namespace_packages = true
+explicit_package_bases = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+# ─── Pytest ────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra --strict-markers --strict-config"
+asyncio_mode = "auto"
+testpaths = ["tests", "apps", "packages"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "unit: fast in-process unit tests",
+    "integration: requires docker-compose stack (db, redis, qdrant)",
+    "contract: schemathesis / OpenAPI contract tests",
+    "e2e: playwright end-to-end tests",
+    "pedagogy: synthetic-cohort + scheduler-invariant tests",
+    "slow: anything > 5s; excluded from default `make verify`",
+    "llm: requires LLM gateway (uses VCR fixtures in CI)",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:pydantic.*",
+]
+
+# ─── Coverage ──────────────────────────────────────────────────
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["apps", "packages"]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/__main__.py",
+]
+
+[tool.coverage.report]
+exclude_also = [
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "@overload",
+]
+show_missing = true
+skip_covered = false
+
+# ─── Bandit (security static analysis) ─────────────────────────
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "node_modules", "data"]
+skips = ["B101"]   # assert-used: tests rely on it

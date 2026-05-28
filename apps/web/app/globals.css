@@ -1,0 +1,21 @@
+/* Phase 1: minimal reset. Phase 8 introduces Tailwind 4 + shadcn/ui tokens. */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #fafafa;
+  color: #111;
+}
+
+@media (prefers-color-scheme: dark) {
+  html,
+  body {
+    background: #111;
+    color: #f5f5f5;
+  }
+}

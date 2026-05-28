@@ -1,2 +1,53 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Force LF line endings on POSIX-tooling files so the Makefile, shell scripts,
+# and Python sources stay consistent across Windows + Linux + macOS contributors.
+# PowerShell scripts keep CRLF because that's the Windows-native convention.
+
+* text=auto eol=lf
+
+# Explicit overrides
+*.py        text eol=lf
+*.pyi       text eol=lf
+*.toml      text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.json      text eol=lf
+*.jsonc     text eol=lf
+*.md        text eol=lf
+*.txt       text eol=lf
+*.ts        text eol=lf
+*.tsx       text eol=lf
+*.js        text eol=lf
+*.jsx       text eol=lf
+*.mjs       text eol=lf
+*.cjs       text eol=lf
+*.css       text eol=lf
+*.scss      text eol=lf
+*.html      text eol=lf
+*.sh        text eol=lf
+Makefile    text eol=lf
+.env*       text eol=lf
+
+# Windows-native scripts: CRLF preserves PowerShell expectations
+*.ps1       text eol=crlf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# Binary
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.svg       text eol=lf
+*.woff      binary
+*.woff2     binary
+*.pdf       binary
+*.mp3       binary
+*.wav       binary
+*.flac      binary
+*.ogg       binary
+*.mp4       binary
+*.webm      binary
+*.joblib    binary
+*.pkl       binary
+*.safetensors binary

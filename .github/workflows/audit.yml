@@ -1,0 +1,82 @@
+name: Audit
+
+on:
+  schedule:
+    # Mondays 04:00 UTC
+    - cron: "0 4 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  security-and-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Setup Python
+        run: uv python install 3.12
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9"
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install deps
+        run: |
+          uv sync --all-extras --all-packages
+          pnpm install --frozen-lockfile
+
+      - name: pip-audit
+        run: uv run pip-audit --disable-pip --strict
+        continue-on-error: true
+
+      - name: bandit
+        run: uv run bandit -q -r packages apps -f json -o bandit.json
+        continue-on-error: true
+
+      - name: pnpm audit
+        run: pnpm audit --prod --json > pnpm-audit.json || true
+
+      - name: License audit
+        run: uv run python scripts/license_check.py
+
+      - name: Abandoned-package audit
+        run: uv run python scripts/abandoned_check.py
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Trivy filesystem scan
+        run: trivy fs --exit-code 0 --severity HIGH,CRITICAL --format json --output trivy.json .
+
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-reports-${{ github.run_id }}
+          path: |
+            bandit.json
+            pnpm-audit.json
+            trivy.json
+          if-no-files-found: warn
+          retention-days: 30

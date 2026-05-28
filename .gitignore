@@ -1,0 +1,119 @@
+# ─── tcf-accel project-specific ────────────────────────────────
+# data/ holds corpora — NEVER commit. A pre-commit hook also enforces this.
+data/**
+!data/.gitkeep
+
+# Local env / secrets
+.env
+.env.*
+!.env.example
+
+# Generated artifacts
+docs/api/openapi*.html
+coverage.xml
+htmlcov/
+
+# Phase-output snapshots written by Celery jobs (Phase 3+)
+.checkpoints/
+
+# Downloaded ML models (live next to the package source, but heavy)
+packages/ml/data/cefr/**
+packages/ml/data/whisper/**
+packages/ml/data/embeddings/**
+!packages/ml/data/.gitkeep
+
+# ─── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+.hypothesis/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# uv
+.venv/
+.uv/
+
+# Tools
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+cython_debug/
+
+# Jupyter
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# ─── Node / pnpm ───────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+.pnp.*
+.yarn/
+
+# Next.js
+.next/
+out/
+.swc/
+
+# Build outputs
+*.tsbuildinfo
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ─── IDE / OS ──────────────────────────────────────────────────
+.vscode/*
+!.vscode/settings.json.example
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ─── Docker / runtime ──────────────────────────────────────────
+# docker-compose's named volumes mount under ./data/ (already excluded)
+*.pid
+*.sock
+
+# ─── Logs ──────────────────────────────────────────────────────
+*.log
+logs/

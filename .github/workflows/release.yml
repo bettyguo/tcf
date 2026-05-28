@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Phase 9 (`09_QUALITY_AUDIT_AND_LAUNCH.md`) elaborates this stub with:
+      # - multi-arch Docker builds (linux/amd64, linux/arm64)
+      # - Helm chart publish
+      # - Signed checksums (cosign)
+      # - PyPI publish for tcf-accel-shared / tcf-accel-sla
+      # - GitHub Release with auto-generated notes from CHANGELOG.md
+      - name: Stub release notice
+        run: |
+          echo "Phase 9 wires the actual release pipeline."
+          echo "Tag: ${{ steps.version.outputs.tag }}"
