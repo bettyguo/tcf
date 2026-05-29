@@ -46,7 +46,7 @@ If you're standing this up for yourself or a small group:
 
 If you're here to grade our claims:
 
-- [Honesty receipts (κ + cohort tables)](README.html#honesty-receipts)
+- [Honesty receipts (κ + cohort tables)](README.md#honesty-receipts)
 - [Launch Readiness Report](LAUNCH_READINESS_REPORT.md) — the signed
   v1.0.0 launch decision (bundle SHA-256 inside).
 - [Pedagogy dossier](PEDAGOGY.md) — eight SLA principles tied to code +
