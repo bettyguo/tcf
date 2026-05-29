@@ -1,0 +1,97 @@
+# Jekyll config for the tcf-accel GitHub Pages docs site.
+#
+# What this site is:
+#   The public-facing docs + "honesty receipts" for tcf-accel v1.0.0.
+#   It renders the launch artefacts (LIMITATIONS, LEARNER_GUIDE, PEDAGOGY,
+#   ARCHITECTURE, OPERATIONS), the signed LAUNCH_READINESS_REPORT, the
+#   ADRs, and the Phase 9 audit dossier (κ table, cohort calibration plot,
+#   security/perf/content audit summaries).
+#
+# What this site is NOT:
+#   The running application. The FastAPI backend, Celery worker, Postgres,
+#   Redis, and Next.js web app cannot run on GitHub Pages (static-only).
+#   To run the live system, self-host per OPERATIONS.md.
+
+title: "tcf-accel"
+description: "Open-source, evidence-based French training for the TCF Canada. B1 → NCLC 7–9 in 12 weeks. v1.0.0 — honesty receipts."
+url: "https://bettyguo.github.io"
+baseurl: "/tcf"
+repository: "bettyguo/tcf"
+
+# GitHub Pages built-in theme. Cayman is the project-site default — minimal,
+# fast, and ships with GH Pages by default so the workflow doesn't need
+# bundler / gem resolution.
+theme: jekyll-theme-cayman
+
+# Tell Jekyll to convert these into rendered HTML pages.
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+
+# Show GitHub source link in the cayman footer.
+show_downloads: false
+
+# Files / directories Jekyll must NOT process. Everything else under the
+# repo root that ends in .md becomes a page.
+exclude:
+  - .venv/
+  - .git/
+  - .github/
+  - .pre-commit-config.yaml
+  - Makefile
+  - alembic.ini
+  - apps/
+  - dist/
+  - infra/
+  - node_modules/
+  - packages/
+  - pnpm-workspace.yaml
+  - pyproject.toml
+  - scripts/
+  - tests/
+  - uv.lock
+  - vendor/
+  - "*.lock"
+  - "*.toml"
+  - "*.cfg"
+  - "*.ini"
+
+# Phase docs are kept but rendered behind a quieter UI; we don't want the
+# main nav cluttered with phase{1..9}_{think,design,audit,evaluate}.md
+# entries — they're linked from the relevant section docs.
+
+# Permalinks: keep file paths stable so links from outside (the v1.0.0
+# release post, X threads, etc.) don't break.
+permalink: pretty
+
+# Plugins. Only GitHub-Pages-allowed plugins work without a custom build.
+plugins:
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-titles-from-headings
+
+# jekyll-relative-links rewrites repo-relative .md links to .html so the
+# README's [LIMITATIONS.md](LIMITATIONS.md) renders to [LIMITATIONS](/LIMITATIONS).
+relative_links:
+  enabled: true
+  collections: true
+
+# jekyll-optional-front-matter — process .md files without YAML front matter
+# (so LIMITATIONS.md etc. need no edits).
+optional_front_matter:
+  remove_originals: true
+
+# jekyll-readme-index — use README.md as the directory index.
+readme_index:
+  enabled: true
+  remove_originals: false
+  with_frontmatter: true
+
+# jekyll-titles-from-headings — derive the page <title> from the first H1.
+titles_from_headings:
+  enabled: true
+  strip_title: false
+  collections: true

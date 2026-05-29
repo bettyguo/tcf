@@ -1,7 +1,16 @@
 # ─── tcf-accel project-specific ────────────────────────────────
-# data/ holds corpora — NEVER commit. A pre-commit hook also enforces this.
+# data/ holds corpora — NEVER commit corpora. A pre-commit hook
+# (scripts/check_no_data_commit.py) enforces R-006 (copyright). The
+# exceptions below are the public audit + calibration artefacts that
+# the README and LAUNCH_READINESS_REPORT cite by path; they contain
+# no learner data, no scraped content, and are part of the published
+# v1.0.0 honesty receipts.
 data/**
 !data/.gitkeep
+!data/audit/
+!data/audit/**
+!data/calibration/
+!data/calibration/**
 
 # Local env / secrets
 .env

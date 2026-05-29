@@ -1,0 +1,280 @@
+{
+  "audit": "pedagogy",
+  "calibration_window_nclc": 0.5,
+  "cohorts": [
+    {
+      "cohort_id": "solid_B1_target_NCLC7",
+      "gate_pass": true,
+      "initial_min": 5.0,
+      "kind": "realistic",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.05 NCLC."
+      ],
+      "per_skill_final_mean": {
+        "CE": 7.15,
+        "CO": 7.176,
+        "EE": 7.278,
+        "EO": 7.304
+      },
+      "planner_projected_min": 7.1,
+      "planner_projection_success": true,
+      "simulated_median_min": 7.147,
+      "simulated_min_5pct": 7.128,
+      "simulated_min_95pct": 7.173,
+      "simulated_p_success": 1.0,
+      "target_nclc": 7
+    },
+    {
+      "cohort_id": "solid_B1_target_NCLC9",
+      "gate_pass": true,
+      "initial_min": 5.0,
+      "kind": "honest_refusal",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.01 NCLC.",
+        "PASS: planner honestly refuses (projected_min=7.20 < target=9)"
+      ],
+      "per_skill_final_mean": {
+        "CE": 7.198,
+        "CO": 7.302,
+        "EE": 7.621,
+        "EO": 7.682
+      },
+      "planner_projected_min": 7.2,
+      "planner_projection_success": false,
+      "simulated_median_min": 7.191,
+      "simulated_min_5pct": 7.138,
+      "simulated_min_95pct": 7.264,
+      "simulated_p_success": 0.0,
+      "target_nclc": 9
+    },
+    {
+      "cohort_id": "uneven_target_NCLC7",
+      "gate_pass": true,
+      "initial_min": 4.0,
+      "kind": "realistic",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.05 NCLC."
+      ],
+      "per_skill_final_mean": {
+        "CE": 7.152,
+        "CO": 7.177,
+        "EE": 7.278,
+        "EO": 7.303
+      },
+      "planner_projected_min": 7.1,
+      "planner_projection_success": true,
+      "simulated_median_min": 7.15,
+      "simulated_min_5pct": 7.13,
+      "simulated_min_95pct": 7.183,
+      "simulated_p_success": 1.0,
+      "target_nclc": 7
+    },
+    {
+      "cohort_id": "strong_B2_target_NCLC9",
+      "gate_pass": true,
+      "initial_min": 7.0,
+      "kind": "realistic",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.05 NCLC."
+      ],
+      "per_skill_final_mean": {
+        "CE": 9.149,
+        "CO": 9.174,
+        "EE": 9.273,
+        "EO": 9.298
+      },
+      "planner_projected_min": 9.1,
+      "planner_projection_success": true,
+      "simulated_median_min": 9.146,
+      "simulated_min_5pct": 9.127,
+      "simulated_min_95pct": 9.175,
+      "simulated_p_success": 1.0,
+      "target_nclc": 9
+    },
+    {
+      "cohort_id": "aggressive_B1_target_C2",
+      "gate_pass": true,
+      "initial_min": 5.0,
+      "kind": "honest_refusal",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.04 NCLC.",
+        "PASS: planner honestly refuses (projected_min=7.10 < target=11)"
+      ],
+      "per_skill_final_mean": {
+        "CE": 7.07,
+        "CO": 7.215,
+        "EE": 7.706,
+        "EO": 7.808
+      },
+      "planner_projected_min": 7.1,
+      "planner_projection_success": false,
+      "simulated_median_min": 7.062,
+      "simulated_min_5pct": 7.008,
+      "simulated_min_95pct": 7.138,
+      "simulated_p_success": 0.0,
+      "target_nclc": 11
+    },
+    {
+      "cohort_id": "short_runway_target_NCLC7",
+      "gate_pass": true,
+      "initial_min": 5.0,
+      "kind": "honest_refusal",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.00 NCLC.",
+        "PASS: planner honestly refuses (projected_min=6.10 < target=7)"
+      ],
+      "per_skill_final_mean": {
+        "CE": 6.1,
+        "CO": 6.15,
+        "EE": 6.315,
+        "EO": 6.343
+      },
+      "planner_projected_min": 6.1,
+      "planner_projection_success": false,
+      "simulated_median_min": 6.101,
+      "simulated_min_5pct": 6.046,
+      "simulated_min_95pct": 6.15,
+      "simulated_p_success": 0.0,
+      "target_nclc": 7
+    },
+    {
+      "cohort_id": "low_budget_target_NCLC7",
+      "gate_pass": true,
+      "initial_min": 5.0,
+      "kind": "honest_refusal",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.05 NCLC.",
+        "PASS: planner honestly refuses (projected_min=5.80 < target=7)"
+      ],
+      "per_skill_final_mean": {
+        "CE": 5.749,
+        "CO": 5.796,
+        "EE": 5.959,
+        "EO": 5.996
+      },
+      "planner_projected_min": 5.8,
+      "planner_projection_success": false,
+      "simulated_median_min": 5.747,
+      "simulated_min_5pct": 5.72,
+      "simulated_min_95pct": 5.774,
+      "simulated_p_success": 0.0,
+      "target_nclc": 7
+    },
+    {
+      "cohort_id": "already_at_target",
+      "gate_pass": true,
+      "initial_min": 9.0,
+      "kind": "trivial",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.02 NCLC."
+      ],
+      "per_skill_final_mean": {
+        "CE": 9.785,
+        "CO": 9.861,
+        "EE": 10.144,
+        "EO": 10.206
+      },
+      "planner_projected_min": 9.8,
+      "planner_projection_success": true,
+      "simulated_median_min": 9.784,
+      "simulated_min_5pct": 9.753,
+      "simulated_min_95pct": 9.822,
+      "simulated_p_success": 1.0,
+      "target_nclc": 9
+    },
+    {
+      "cohort_id": "heritage_production_gap",
+      "gate_pass": true,
+      "initial_min": 4.0,
+      "kind": "realistic",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.01 NCLC."
+      ],
+      "per_skill_final_mean": {
+        "CE": 8.399,
+        "CO": 8.423,
+        "EE": 7.388,
+        "EO": 7.419
+      },
+      "planner_projected_min": 7.4,
+      "planner_projection_success": true,
+      "simulated_median_min": 7.385,
+      "simulated_min_5pct": 7.335,
+      "simulated_min_95pct": 7.439,
+      "simulated_p_success": 1.0,
+      "target_nclc": 7
+    },
+    {
+      "cohort_id": "reception_only_weakness",
+      "gate_pass": true,
+      "initial_min": 4.0,
+      "kind": "realistic",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.02 NCLC."
+      ],
+      "per_skill_final_mean": {
+        "CE": 7.221,
+        "CO": 7.256,
+        "EE": 7.647,
+        "EO": 7.675
+      },
+      "planner_projected_min": 7.2,
+      "planner_projection_success": true,
+      "simulated_median_min": 7.221,
+      "simulated_min_5pct": 7.189,
+      "simulated_min_95pct": 7.254,
+      "simulated_p_success": 1.0,
+      "target_nclc": 7
+    },
+    {
+      "cohort_id": "ee_bottleneck_only",
+      "gate_pass": true,
+      "initial_min": 4.0,
+      "kind": "realistic",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.04 NCLC."
+      ],
+      "per_skill_final_mean": {
+        "CE": 8.239,
+        "CO": 8.275,
+        "EE": 8.411,
+        "EO": 8.447
+      },
+      "planner_projected_min": 8.2,
+      "planner_projection_success": true,
+      "simulated_median_min": 8.238,
+      "simulated_min_5pct": 8.212,
+      "simulated_min_95pct": 8.275,
+      "simulated_p_success": 1.0,
+      "target_nclc": 8
+    },
+    {
+      "cohort_id": "eo_bottleneck_only",
+      "gate_pass": true,
+      "initial_min": 4.0,
+      "kind": "realistic",
+      "notes": [
+        "PASS: planner-simulator calibrated within 0.03 NCLC."
+      ],
+      "per_skill_final_mean": {
+        "CE": 8.237,
+        "CO": 8.272,
+        "EE": 8.41,
+        "EO": 8.441
+      },
+      "planner_projected_min": 8.2,
+      "planner_projection_success": true,
+      "simulated_median_min": 8.235,
+      "simulated_min_5pct": 8.21,
+      "simulated_min_95pct": 8.271,
+      "simulated_p_success": 1.0,
+      "target_nclc": 8
+    }
+  ],
+  "learning_rate_per_minute": 0.0008333333333333334,
+  "noise_sigma_fraction": 0.25,
+  "overall_pass": true,
+  "phase": 9,
+  "realistic_min_p_success": 0.65,
+  "trajectories_per_cohort": 100
+}
