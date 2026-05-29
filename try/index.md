@@ -13,6 +13,9 @@ scripts:
     This is a faithful in-browser model
   </p>
   <p>The three demos below run the same logic as the production system — <a href="{{ '/PEDAGOGY/' | relative_url }}#5-the-readiness-gate">readiness gate (ADR-045)</a>, <a href="{{ '/ARCHITECTURE/' | relative_url }}#4-the-estimator-bayesian-nclc-posterior">credible interval (ADR-025)</a>, and <a href="{{ '/ARCHITECTURE/' | relative_url }}#3-the-planner-pipeline">bottleneck allocator (ADR-027)</a> — re-implemented in vanilla JS so it works without a backend. Move the sliders; the renderings update live.</p>
+  <p style="margin-top:10px; font-size: var(--fs-xs); color: var(--ink-muted);">
+    <strong>Keyboard:</strong> Tab into any slider, then <span class="kbd">←</span> <span class="kbd">→</span> for fine adjustment or <span class="kbd">PgUp</span> <span class="kbd">PgDn</span> for a larger step. State is preserved in the URL, so the <em>Share configuration</em> button below each demo gives you a permalink to your current setup. To make the trajectory of all this concrete in 12-week terms, see the <a href="{{ '/learn/' | relative_url }}#trajectory">learner-studio trajectory replayer</a>.
+  </p>
 </div>
 
 ## 1. Readiness gate
@@ -75,6 +78,10 @@ scripts:
     </div>
 
     <p class="demo-note">Rule (ADR-045): light = <strong>READY (🟢)</strong> only if min(posteriors) ≥ target AND mocks_green ≥ 2 AND all four confident. Otherwise the widget shows the most informative degraded state and offers the "see your priority drills" CTA — never the "book your exam" CTA.</p>
+    <button class="demo-share" type="button" aria-label="Copy a shareable link to this configuration">
+      <svg class="copy-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="9" height="9" rx="1.5"/><path d="M11 4V2.5A0.5 0.5 0 0 0 10.5 2H3A1 1 0 0 0 2 3v8a1 1 0 0 0 1 1h1"/></svg>
+      Share this configuration
+    </button>
   </div>
 </section>
 
@@ -128,6 +135,10 @@ scripts:
 
     <div id="demo-ci-conf" style="margin-top: 24px;"></div>
     <p class="demo-note">Confidence gate (ADR-025): a posterior is <code>confident=True</code> iff <strong>n_obs ≥ 40</strong> AND <strong>variance ≤ 0.4</strong> AND ≥ 3 difficulty bands have been seen (the third clause requires session data we don't have here, so this demo gates on the first two only).</p>
+    <button class="demo-share" type="button">
+      <svg class="copy-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="9" height="9" rx="1.5"/><path d="M11 4V2.5A0.5 0.5 0 0 0 10.5 2H3A1 1 0 0 0 2 3v8a1 1 0 0 0 1 1h1"/></svg>
+      Share this configuration
+    </button>
   </div>
 </section>
 
@@ -178,6 +189,10 @@ scripts:
 
     <div id="demo-alloc"></div>
     <p class="demo-note">Why EE/EO get extra minutes when they're below target: production skills (EE writing, EO speaking) need pushed-output volume to move (Swain 1985 — see <a href="{{ '/PEDAGOGY/' | relative_url }}#1-the-eight-evidence-aligned-sla-principles">PEDAGOGY §1</a>). β=1.4/1.5 is the documented over-weight (ADR-027).</p>
+    <button class="demo-share" type="button">
+      <svg class="copy-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="9" height="9" rx="1.5"/><path d="M11 4V2.5A0.5 0.5 0 0 0 10.5 2H3A1 1 0 0 0 2 3v8a1 1 0 0 0 1 1h1"/></svg>
+      Share this configuration
+    </button>
   </div>
 </section>
 
@@ -187,6 +202,6 @@ scripts:
 
 This page is what GitHub Pages can do — three pure-function UI surfaces in JS. The rest of the system needs a backend, a queue, a database, and an audio pipeline. Three honest ways to run it:
 
-- **Solo, on your laptop** — `docker compose up`. See [OPERATIONS.md §1](OPERATIONS.md). Cold start under 60 s.
+- **Solo, on your laptop** — `docker compose up`. See [OPERATIONS.md §1]({{ '/OPERATIONS/' | relative_url }}). Cold start under 60 s.
 - **On a cloud VM** — Helm chart at `infra/helm/`. Single-tenant per learner at v1.0.
 - **Just read the artefacts** — the [signed Launch Readiness Report]({{ '/LAUNCH_READINESS_REPORT/' | relative_url }}), the [pedagogy audit JSON]({{ '/data/audit/phase9/pedagogy_audit.json' | relative_url }}), the [published κ]({{ '/data/calibration/ee.v1.report/' | relative_url }}). Verifiable without running anything.

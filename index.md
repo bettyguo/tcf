@@ -14,11 +14,14 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
           Open-source, evidence-aligned French training for the TCF Canada — with a readiness signal that refuses to lie to you about whether you're ready to book.
         </p>
         <div class="hero-cta">
-          <a class="btn btn-primary" href="{{ '/try/' | relative_url }}">
-            Try the readiness widget
+          <a class="btn btn-primary" href="{{ '/learn/' | relative_url }}">
+            Open the learner studio
             <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 8h10M9 4l4 4-4 4"/></svg>
           </a>
-          <a class="btn btn-secondary" href="{{ '/LIMITATIONS/' | relative_url }}">
+          <a class="btn btn-secondary" href="{{ '/try/' | relative_url }}">
+            Try the readiness widget
+          </a>
+          <a class="btn btn-ghost" href="{{ '/LIMITATIONS/' | relative_url }}">
             Read the limitations first
           </a>
         </div>
@@ -144,6 +147,7 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
         <p>Read the limitations first. If anything there is a deal-breaker, this isn't your path — and we're glad you found out before investing 210 hours.</p>
         <ul>
           <li><a href="{{ '/LIMITATIONS/' | relative_url }}">LIMITATIONS<span class="li-desc">12 things we don't promise. Read this first.</span></a></li>
+          <li><a href="{{ '/learn/' | relative_url }}">Learner studio<span class="li-desc">NCLC explorer, exam-format walkthrough, mock-section timer, trajectory replayer.</span></a></li>
           <li><a href="{{ '/LEARNER_GUIDE/' | relative_url }}">Learner guide<span class="li-desc">The 12-week journey, week by week.</span></a></li>
           <li><a href="{{ '/try/' | relative_url }}">Try the readiness widget<span class="li-desc">See exactly what the system will (and won't) tell you.</span></a></li>
         </ul>
@@ -185,17 +189,28 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
     <div class="receipt-card">
       <h3>Auto-scoring κ — Cohen's quadratic-weighted, EE rubric</h3>
       <p class="receipt-sub"><strong>Experimental badge active.</strong> v1.0 ships κ_silver against an LLM critic. The 200-row expert-rater set (κ_gold) is a v1.1 commitment — see R-010 + <a href="{{ '/LIMITATIONS/' | relative_url }}#4-auto-scoring-is-not-perfect">LIMITATIONS §4</a>.</p>
-      <table>
-        <thead><tr><th>Dimension</th><th>κ (silver)</th><th>r</th><th>MAE</th><th>n</th></tr></thead>
-        <tbody>
-          <tr><td><code>task_completion</code></td><td>1.000</td><td>0.996</td><td>0.072</td><td>12</td></tr>
-          <tr><td><code>coherence_cohesion</code></td><td>1.000</td><td>0.995</td><td>0.080</td><td>12</td></tr>
-          <tr><td><code>lexical_range</code></td><td>1.000</td><td>0.993</td><td>0.093</td><td>12</td></tr>
-          <tr><td><code>grammatical_accuracy</code></td><td>1.000</td><td>0.994</td><td>0.086</td><td>12</td></tr>
-          <tr><td><code>register_appropriateness</code></td><td>1.000</td><td>0.987</td><td>0.140</td><td>12</td></tr>
-          <tr><td><code>canadian_context_integration</code></td><td>0.982</td><td>0.993</td><td>0.133</td><td>12</td></tr>
-        </tbody>
-      </table>
+      <div class="kappa-chart" aria-label="Per-dimension Cohen's kappa">
+        <div class="kappa-row"><span class="kappa-name">task_completion</span><span class="kappa-bar"><span class="kappa-bar-fg" style="width:100%"></span></span><span class="kappa-val">1.000</span></div>
+        <div class="kappa-row"><span class="kappa-name">coherence_cohesion</span><span class="kappa-bar"><span class="kappa-bar-fg" style="width:100%"></span></span><span class="kappa-val">1.000</span></div>
+        <div class="kappa-row"><span class="kappa-name">lexical_range</span><span class="kappa-bar"><span class="kappa-bar-fg" style="width:100%"></span></span><span class="kappa-val">1.000</span></div>
+        <div class="kappa-row"><span class="kappa-name">grammatical_accuracy</span><span class="kappa-bar"><span class="kappa-bar-fg" style="width:100%"></span></span><span class="kappa-val">1.000</span></div>
+        <div class="kappa-row"><span class="kappa-name">register_appropriateness</span><span class="kappa-bar"><span class="kappa-bar-fg" style="width:100%"></span></span><span class="kappa-val">1.000</span></div>
+        <div class="kappa-row"><span class="kappa-name">canadian_context_integration</span><span class="kappa-bar"><span class="kappa-bar-fg" style="width:98.2%"></span></span><span class="kappa-val">0.982</span></div>
+      </div>
+      <details style="margin-top:14px;">
+        <summary style="font-size: var(--fs-xs); color: var(--ink-muted); cursor: pointer; font-weight: 600;">Show full statistics (r · MAE · n)</summary>
+        <table style="margin-top:10px;">
+          <thead><tr><th>Dimension</th><th>κ (silver)</th><th>r</th><th>MAE</th><th>n</th></tr></thead>
+          <tbody>
+            <tr><td><code>task_completion</code></td><td>1.000</td><td>0.996</td><td>0.072</td><td>12</td></tr>
+            <tr><td><code>coherence_cohesion</code></td><td>1.000</td><td>0.995</td><td>0.080</td><td>12</td></tr>
+            <tr><td><code>lexical_range</code></td><td>1.000</td><td>0.993</td><td>0.093</td><td>12</td></tr>
+            <tr><td><code>grammatical_accuracy</code></td><td>1.000</td><td>0.994</td><td>0.086</td><td>12</td></tr>
+            <tr><td><code>register_appropriateness</code></td><td>1.000</td><td>0.987</td><td>0.140</td><td>12</td></tr>
+            <tr><td><code>canadian_context_integration</code></td><td>0.982</td><td>0.993</td><td>0.133</td><td>12</td></tr>
+          </tbody>
+        </table>
+      </details>
       <div class="receipt-meta">
         <span class="pill">Training-set hash: <code>7591d824b2101399…</code></span>
         <span class="pill"><a href="{{ '/data/calibration/ee.v1.report/' | relative_url }}">Source ↗</a></span>

@@ -8,6 +8,92 @@
 (function () {
   "use strict";
 
+  // ─── Deep-link state (?d=...) ────────────────────────────────────
+  // We encode every slider input as a short key in the URL query so a
+  // configuration can be shared. Bare URL = defaults.
+  var DEEPLINK_IDS = [
+    "r-co", "r-ce", "r-ee", "r-eo", "r-target", "r-mocks", "r-confident",
+    "ci-mean", "ci-var", "ci-nobs", "ci-target",
+    "a-budget", "a-co", "a-ce", "a-ee", "a-eo", "a-target"
+  ];
+  // Map id -> short key
+  var KEY = {};
+  DEEPLINK_IDS.forEach(function (id, i) {
+    KEY[id] = id.replace(/-/g, "");
+  });
+
+  function loadFromUrl() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      DEEPLINK_IDS.forEach(function (id) {
+        var v = params.get(KEY[id]);
+        if (v !== null) {
+          var el = document.getElementById(id);
+          if (el) el.value = v;
+        }
+      });
+    } catch (e) { /* no-op */ }
+  }
+  function currentUrl() {
+    var params = new URLSearchParams();
+    DEEPLINK_IDS.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) params.set(KEY[id], el.value);
+    });
+    return window.location.origin + window.location.pathname + "?" + params.toString();
+  }
+  function setupShareButtons() {
+    document.querySelectorAll(".demo-share").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var url = currentUrl();
+        try {
+          navigator.clipboard.writeText(url).then(function () {
+            btn.classList.add("is-copied");
+            var orig = btn.dataset.origText || btn.textContent;
+            btn.dataset.origText = orig;
+            btn.textContent = "Link copied!";
+            setTimeout(function () {
+              btn.classList.remove("is-copied");
+              btn.textContent = orig;
+            }, 1600);
+          }).catch(function () {
+            window.prompt("Copy this link:", url);
+          });
+        } catch (e) {
+          window.prompt("Copy this link:", url);
+        }
+      });
+    });
+  }
+
+  // Briefly flash a value when its slider changes (better visual feedback).
+  function flashVal(id) {
+    var el = document.querySelector('[data-val="' + id + '"]');
+    if (!el) return;
+    el.classList.add("is-flash");
+    clearTimeout(el._flashTimer);
+    el._flashTimer = setTimeout(function () { el.classList.remove("is-flash"); }, 240);
+  }
+
+  // Keyboard nudge: PageUp/PageDown jump by larger step on focused range.
+  function attachKeyboardNudge(id, bigStep) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("keydown", function (e) {
+      if (e.key === "PageUp" || e.key === "PageDown") {
+        e.preventDefault();
+        var step = bigStep || 1;
+        var dir = e.key === "PageUp" ? 1 : -1;
+        var v = parseFloat(el.value) + dir * step;
+        var min = parseFloat(el.min), max = parseFloat(el.max);
+        el.value = Math.min(max, Math.max(min, v));
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+  }
+
+  loadFromUrl();
+
   // ─── 1. Readiness gate (ADR-045) ─────────────────────────────────
 
   function computeReadiness(posteriors, target, mocksGreen, confidentCount) {
@@ -105,7 +191,10 @@
 
   ["r-co", "r-ce", "r-ee", "r-eo", "r-target", "r-mocks", "r-confident"].forEach(function (id) {
     var el = document.getElementById(id);
-    if (el) el.addEventListener("input", renderReadiness);
+    if (el) {
+      el.addEventListener("input", function () { flashVal(id); renderReadiness(); });
+      attachKeyboardNudge(id, id === "r-target" ? 1 : (id === "r-mocks" || id === "r-confident" ? 1 : 0.5));
+    }
   });
   if (document.getElementById("demo-readiness")) renderReadiness();
 
@@ -165,7 +254,10 @@
 
   ["ci-mean", "ci-var", "ci-nobs", "ci-target"].forEach(function (id) {
     var el = document.getElementById(id);
-    if (el) el.addEventListener("input", renderCi);
+    if (el) {
+      el.addEventListener("input", function () { flashVal(id); renderCi(); });
+      attachKeyboardNudge(id, id === "ci-nobs" ? 10 : id === "ci-target" ? 1 : 0.5);
+    }
   });
   if (document.getElementById("demo-ci")) renderCi();
 
@@ -280,7 +372,12 @@
 
   ["a-budget", "a-co", "a-ce", "a-ee", "a-eo", "a-target"].forEach(function (id) {
     var el = document.getElementById(id);
-    if (el) el.addEventListener("input", renderAllocator);
+    if (el) {
+      el.addEventListener("input", function () { flashVal(id); renderAllocator(); });
+      attachKeyboardNudge(id, id === "a-budget" ? 10 : id === "a-target" ? 1 : 0.5);
+    }
   });
   if (document.getElementById("demo-alloc")) renderAllocator();
+
+  setupShareButtons();
 })();
