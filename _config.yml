@@ -73,6 +73,8 @@ nav:
     url: /practice/
   - title: "Learn"
     url: /learn/
+  - title: "Tools"
+    url: /tools/
   - title: "Try it"
     url: /try/
   - title: "Limitations"
@@ -93,6 +95,7 @@ footer:
       - { title: "Operations runbook", url: "/OPERATIONS/" }
       - { title: "Practice (interactive)", url: "/practice/" }
       - { title: "Learner studio (interactive)", url: "/learn/" }
+      - { title: "Mechanics toolkit (interactive)", url: "/tools/" }
       - { title: "Search", url: "/search/" }
   - title: "Verify"
     links:

@@ -197,6 +197,7 @@
   var COMMANDS = [
     { title: "Practice", desc: "Diagnostic, vocab SRS, dictée, writing, reading", icon: "play", url: "/practice/", group: "Pages", keywords: "drills exercises srs flashcards" },
     { title: "Learner studio", desc: "NCLC explorer, exam tabs, mock timer, trajectory", icon: "book", url: "/learn/", group: "Pages", keywords: "interactive nclc" },
+    { title: "Mechanics toolkit", desc: "Verb conjugator, numbers, dates, accent helper, IPA chart", icon: "settings", url: "/tools/", group: "Pages", keywords: "conjugation verbes nombres dates ipa accents" },
     { title: "Try the readiness widget", desc: "Live demo of the readiness gate", icon: "play", url: "/try/", group: "Pages", keywords: "demo readiness gate ci interval" },
     { title: "Limitations", desc: "Twelve things this system does not promise", icon: "warn", url: "/LIMITATIONS/", group: "Pages", keywords: "honesty disclaimers" },
     { title: "Pedagogy dossier", desc: "Eight SLA principles, evidence, receipts", icon: "book", url: "/PEDAGOGY/", group: "Pages", keywords: "pedagogy sla evidence" },
@@ -377,6 +378,7 @@
       '    <tr><td>Practice</td><td><span class="kbd">g</span> <span class="kbd">p</span></td></tr>' +
       '    <tr><td>Try it</td><td><span class="kbd">g</span> <span class="kbd">t</span></td></tr>' +
       '    <tr><td>Learn studio</td><td><span class="kbd">g</span> <span class="kbd">l</span></td></tr>' +
+      '    <tr><td>Tools (mechanics)</td><td><span class="kbd">g</span> <span class="kbd">o</span></td></tr>' +
       '    <tr><td>Close any overlay</td><td><span class="kbd">esc</span></td></tr>' +
       '  </tbody></table>' +
       '  <button class="kbd-modal-close" type="button">Close</button>' +
@@ -414,12 +416,97 @@
     // g-prefix shortcuts: gh, gp, gt, gl
     if (e.key === "g") { lastG = Date.now(); return; }
     if (lastG && (Date.now() - lastG) < 1100) {
-      var targets = { h: "/", p: "/practice/", t: "/try/", l: "/learn/", a: "/adrs/", s: "/search/" };
+      var targets = { h: "/", p: "/practice/", t: "/try/", l: "/learn/", a: "/adrs/", s: "/search/", o: "/tools/" };
       var t = targets[e.key.toLowerCase()];
       if (t) { e.preventDefault(); window.location.href = (window.SITE_BASE || "") + t; }
       lastG = 0;
     }
   });
+
+  /* ───────────── Landing quick-quiz ("What's my level?") ──── */
+  // 4 FEI-shape items spanning A2 → C1. Heuristic scoring (count correct
+  // weighted by difficulty) → suggested NCLC band + onward link.
+  (function () {
+    var stage = document.getElementById("qq-stage");
+    if (!stage) return;
+    var QQ = [
+      { lvl: "A2", q: "Choisis la phrase correcte.", o: [
+          "Je suis allé au marché hier.", "Je suis aller au marché hier.",
+          "Je vais allé au marché hier.", "J'ai aller au marché hier."
+        ], c: 0 },
+      { lvl: "B1", q: "« Bien que la mesure ___ utile, son application reste difficile. »", o: [
+          "est", "soit", "était", "serait"
+        ], c: 1 },
+      { lvl: "B2", q: "Synonyme le plus précis de « contraindre » dans : « la pluie nous a contraints à reporter ».", o: [
+          "encouragés", "obligés", "invités", "autorisés"
+        ], c: 1 },
+      { lvl: "C1", q: "« Il n'en demeure pas moins que… » introduit…", o: [
+          "une question rhétorique", "une concession suivie d'une affirmation forte",
+          "un exemple chiffré", "une définition technique"
+        ], c: 1 }
+    ];
+    var levelMap = ["A2 — NCLC 4", "B1 — NCLC 5–6", "B2 — NCLC 7–8", "C1 — NCLC 9–10"];
+    var state = { i: 0, hits: [false, false, false, false] };
+
+    function render() {
+      var p1 = document.getElementById("qq-p1"), p2 = document.getElementById("qq-p2"),
+          p3 = document.getElementById("qq-p3"), p4 = document.getElementById("qq-p4");
+      [p1, p2, p3, p4].forEach(function (el, idx) { if (el) el.classList.toggle("is-done", idx < state.i); });
+      var iEl = document.getElementById("qq-i");
+      var nEl = document.getElementById("qq-n");
+      if (iEl) iEl.textContent = Math.min(state.i + 1, QQ.length);
+      if (nEl) nEl.textContent = QQ.length;
+
+      if (state.i >= QQ.length) {
+        var hits = state.hits;
+        // Highest-difficulty correct answer → band; need consecutive correctness from A2 up to that level.
+        var band = -1;
+        for (var k = 0; k < hits.length; k++) {
+          if (hits[k]) band = k; else break;
+        }
+        if (band < 0) {
+          // None right → band stays -1
+        }
+        var label = band < 0 ? "Below A2 — start from foundations" : levelMap[band];
+        var path = band >= 2
+          ? '<a class="btn btn-primary" href="' + (window.SITE_BASE || "") + '/practice/#diagnostic">Take the 8-item placement</a><a class="btn btn-secondary" href="' + (window.SITE_BASE || "") + '/learn/">Open learner studio</a>'
+          : band >= 0
+            ? '<a class="btn btn-primary" href="' + (window.SITE_BASE || "") + '/practice/">Start daily practice</a><a class="btn btn-secondary" href="' + (window.SITE_BASE || "") + '/tools/">Brush up mechanics</a>'
+            : '<a class="btn btn-primary" href="' + (window.SITE_BASE || "") + '/LEARNER_GUIDE/">Read the 12-week guide</a><a class="btn btn-secondary" href="' + (window.SITE_BASE || "") + '/tools/">Open the toolkit</a>';
+        stage.innerHTML =
+          '<div class="quickquiz-result">' +
+          '  <span class="level-badge">' + label + '</span>' +
+          '  <h4>You answered ' + hits.filter(Boolean).length + ' / ' + QQ.length + ' correctly.</h4>' +
+          '  <p>This is a 90-second vibe-check, not a calibrated diagnostic. The 8-item placement on /practice/ gives a per-skill NCLC point estimate with a credible interval. <strong>If the vibe-check says NCLC 7–8 but the calibrated one says NCLC 5, trust the latter.</strong></p>' +
+          '  <div class="quickquiz-actions">' + path + '</div>' +
+          '  <button class="quickquiz-restart" type="button">↻ Try again</button>' +
+          '</div>';
+        var restart = stage.querySelector(".quickquiz-restart");
+        if (restart) restart.addEventListener("click", function () { state = { i: 0, hits: [false, false, false, false] }; render(); });
+        return;
+      }
+
+      var item = QQ[state.i];
+      var letters = ["A", "B", "C", "D"];
+      var optsHtml = item.o.map(function (o, idx) {
+        return '<button class="quickquiz-opt" data-idx="' + idx + '" type="button">' +
+          '<span class="quickquiz-opt-letter">' + letters[idx] + '</span>' +
+          '<span lang="fr">' + o + '</span></button>';
+      }).join("");
+      stage.innerHTML =
+        '<p class="quickquiz-q" lang="fr">' + item.q + '</p>' +
+        '<div class="quickquiz-opts">' + optsHtml + '</div>';
+      stage.querySelectorAll(".quickquiz-opt").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var idx = parseInt(b.dataset.idx, 10);
+          state.hits[state.i] = (idx === item.c);
+          state.i++;
+          render();
+        });
+      });
+    }
+    render();
+  })();
 
   /* ───────────── PWA service-worker registration ──────────── */
   if ("serviceWorker" in navigator && window.location.protocol !== "file:") {

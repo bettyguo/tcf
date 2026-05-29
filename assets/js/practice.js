@@ -1264,6 +1264,64 @@
     location.reload();
   });
 
+  /* ───────── Sparkline (last 30 days, minutes/day) ───────── */
+  function renderSparkline() {
+    var svg = document.getElementById("streak-spark");
+    if (!svg) return;
+    var hist = lsGet("history", {});
+    var d = new Date(); d.setHours(0, 0, 0, 0);
+    var pts = [];
+    for (var i = 29; i >= 0; i--) {
+      var k = new Date(d.getTime() - i * 86400000).toISOString().slice(0, 10);
+      pts.push({ key: k, mins: hist[k] || 0 });
+    }
+    var max = Math.max.apply(null, pts.map(function (p) { return p.mins; }).concat([1]));
+    // 30 bars across 300 viewBox width, 8px each + 2px gap = 10px.
+    var html = "";
+    pts.forEach(function (p, idx) {
+      var h = Math.max(2, Math.round((p.mins / max) * 44));
+      var x = idx * 10;
+      var y = 48 - h;
+      var cls = "streak-spark-bar" + (idx === pts.length - 1 ? " is-today" : "");
+      html += '<rect class="' + cls + '" x="' + x + '" y="' + y + '" width="8" height="' + h + '" rx="1.5"><title>' + p.key + ' — ' + Math.round(p.mins) + ' min</title></rect>';
+    });
+    svg.innerHTML = html;
+  }
+  // Hook sparkline into the streak renderer so it stays in sync.
+  var _origRenderStreak = renderStreak;
+  renderStreak = function () { _origRenderStreak(); renderSparkline(); };
+
+  /* ───────── Stats import (companion to export) ───────── */
+  var imp = document.getElementById("stats-import");
+  var impFile = document.getElementById("stats-import-file");
+  if (imp && impFile) {
+    imp.addEventListener("click", function () { impFile.click(); });
+    impFile.addEventListener("change", function () {
+      var f = impFile.files && impFile.files[0];
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          var parsed = JSON.parse(e.target.result);
+          if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("not an object");
+          // Validate at least one known key — defensive, not exhaustive.
+          var known = ["history", "sessions", "srs", "diagnostic", "dict-history", "read-history", "write-count"];
+          var hits = known.filter(function (k) { return Object.prototype.hasOwnProperty.call(parsed, k); });
+          if (!hits.length) throw new Error("no recognized keys");
+          if (!confirm("Import will OVERWRITE your local progress with " + hits.length + " key(s) from this file. Continue?")) return;
+          Object.keys(parsed).forEach(function (k) {
+            try { localStorage.setItem(LS_PREFIX + k, JSON.stringify(parsed[k])); } catch (e2) {}
+          });
+          if (window.tcfToast) window.tcfToast("Imported. Reloading…");
+          setTimeout(function () { location.reload(); }, 600);
+        } catch (err) {
+          alert("Could not parse import file: " + (err.message || err));
+        }
+      };
+      reader.readAsText(f);
+    });
+  }
+
   renderStreak();
   renderStats();
 })();

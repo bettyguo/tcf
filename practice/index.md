@@ -13,7 +13,7 @@ body_class: page-practice
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     Real practice — no signup, fully offline-capable
   </p>
-  <p>Every drill below runs in your browser. Audio uses your device's built-in TTS (no network). Progress is saved in <code>localStorage</code> only — clear your data, lose your progress. The vocabulary deck is CC BY-SA 4.0 and ships with the repo (<a href="https://github.com/bettyguo/tcf/tree/main/data/practice">data/practice/</a>).</p>
+  <p>Every drill below runs in your browser. Audio uses your device's built-in TTS (no network). Progress is saved in <code>localStorage</code> only — clear your data, lose your progress. The 241-card vocabulary deck is CC BY-SA 4.0 and ships inline with the page bundle (<a href="https://github.com/bettyguo/tcf/blob/main/assets/js/practice.js">assets/js/practice.js</a>).</p>
 </div>
 
 <nav class="learn-toc" aria-label="On this page">
@@ -30,6 +30,10 @@ body_class: page-practice
     <div class="streak-badge"><span class="streak-num" data-stat="streak">0</span><span class="streak-label">day streak</span></div>
     <div class="streak-cells" data-stat="streak-cells" aria-label="Last 14 days of practice"></div>
     <p class="streak-meta">Total minutes: <strong data-stat="total-min">0</strong> · Sessions: <strong data-stat="sessions">0</strong> · Best streak: <strong data-stat="best-streak">0</strong></p>
+    <div class="streak-spark">
+      <p class="streak-spark-label">Last 30 days · minutes per day</p>
+      <svg class="streak-spark-svg" id="streak-spark" viewBox="0 0 300 48" preserveAspectRatio="none" aria-label="Practice minutes, last 30 days"></svg>
+    </div>
   </div>
 </section>
 
@@ -60,16 +64,16 @@ body_class: page-practice
 
 ## ② Vocabulary — SM-2 spaced repetition {#vocab}
 
-> 240 essential B1–B2 words and phrases for the TCF Canada, indexed by topic (Express Entry, civic life, work, school, daily life). Cards use the [SM-2 algorithm](https://en.wikipedia.org/wiki/SuperMemo) so the next-review interval grows with each correct answer. Rate yourself 1–5 after revealing the back.
+> 241 essential B1–B2 words and phrases for the TCF Canada, indexed by topic (Express Entry, civic life, work, school, daily life). Cards use the [SM-2 algorithm](https://en.wikipedia.org/wiki/SuperMemo) so the next-review interval grows with each correct answer. Rate yourself 1–5 after revealing the back. Press <span class="kbd">space</span> to reveal, then <span class="kbd">1</span>–<span class="kbd">5</span> to grade.
 
 <section class="learn-card srs-card" data-tool="srs">
   <div class="srs-controls">
     <label for="srs-deck">Deck</label>
     <select id="srs-deck" class="select">
-      <option value="all">All B1–B2 (240 cards)</option>
+      <option value="all">All B1–B2 (241 cards)</option>
       <option value="ee_canada">Express Entry / Canadian civic life (48)</option>
       <option value="work">Work &amp; professional life (52)</option>
-      <option value="school">School &amp; academic French (38)</option>
+      <option value="school">School &amp; academic French (39)</option>
       <option value="daily">Daily life, money, health (62)</option>
       <option value="connectors">Connectors &amp; argumentation (40)</option>
     </select>
@@ -223,7 +227,7 @@ body_class: page-practice
     </div>
     <div class="stat-tile">
       <div class="stat-tile-label">Vocab cards learned</div>
-      <div class="stat-tile-val"><span data-stat="vocab-learned">0</span> <span class="stat-sub">/ 240</span></div>
+      <div class="stat-tile-val"><span data-stat="vocab-learned">0</span> <span class="stat-sub">/ 241</span></div>
     </div>
     <div class="stat-tile">
       <div class="stat-tile-label">Dictées correct</div>
@@ -244,9 +248,13 @@ body_class: page-practice
   </div>
   <div class="stats-actions">
     <button class="btn btn-secondary" id="stats-export">Export JSON</button>
+    <button class="btn btn-secondary" id="stats-import">Import JSON…</button>
+    <input class="stats-import-input" type="file" id="stats-import-file" accept="application/json,.json" />
     <button class="btn btn-ghost" id="stats-reset">Reset all progress</button>
   </div>
-  <p class="demo-note">All stats live in <code>localStorage</code> under the <code>tcf.practice.*</code> namespace. Exported JSON is a single, hashable file — feed it to your own dashboard, or share it on a forum thread when asking for advice without sharing your account.</p>
+  <div class="stats-import-row">
+    <p class="demo-note">All stats live in <code>localStorage</code> under the <code>tcf.practice.*</code> namespace. Exported JSON is a single, hashable file — move between browsers, share with a tutor, or feed it to your own dashboard. Import expects the same shape (validated client-side; bad files are rejected).</p>
+  </div>
 </section>
 
 ---

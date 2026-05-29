@@ -37,6 +37,12 @@ permalink: /manifest.webmanifest
       "short_name": "Try",
       "description": "Live demo of the readiness gate",
       "url": "{{ '/try/' | relative_url }}"
+    },
+    {
+      "name": "Mechanics toolkit",
+      "short_name": "Tools",
+      "description": "Verb conjugator, numbers, dates, accents, IPA chart",
+      "url": "{{ '/tools/' | relative_url }}"
     }
   ]
 }

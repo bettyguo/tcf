@@ -140,7 +140,7 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
       <p class="section-eyebrow">Interactive — five real drills</p>
       <h2>Train in your browser, today, for free.</h2>
       <p class="section-lede">
-        The practice page bundles a diagnostic placement, an SM-2 spaced-repetition vocabulary deck (240 cards), a single-play listening dictée with word-level diff, a timed EE writing pad, and a reading-speed test with comprehension grading. No backend, no signup, your progress lives in your browser.
+        The practice page bundles a diagnostic placement, an SM-2 spaced-repetition vocabulary deck (241 cards), a single-play listening dictée with word-level diff, a timed EE writing pad, and a reading-speed test with comprehension grading. No backend, no signup, your progress lives in your browser.
       </p>
     </div>
     <div class="grid grid-3">
@@ -155,7 +155,7 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
       <article class="card">
         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M8 4v14M16 4v14"/></svg></span>
         <h3>② SRS vocabulary</h3>
-        <p>240 essential B1–B2 cards across 5 topical decks (Express Entry, work, school, daily life, connectors). SM-2 algorithm.</p>
+        <p>241 essential B1–B2 cards across 5 topical decks (Express Entry, work, school, daily life, connectors). SM-2 algorithm.</p>
         <a class="card-link" href="{{ '/practice/#vocab' | relative_url }}">Open the deck
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
         </a>
@@ -189,6 +189,63 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
         <h3>Your stats</h3>
         <p>Streak heatmap, total minutes, vocab learned, dictée pass rate, median WPM. All in <code>localStorage</code>. Exportable JSON.</p>
         <a class="card-link" href="{{ '/practice/#stats' | relative_url }}">View dashboard
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="quickquiz-section">
+  <div class="container">
+    <div class="section-head">
+      <p class="section-eyebrow">90-second placement</p>
+      <h2>What's my level — roughly?</h2>
+      <p class="section-lede">
+        Four FEI-shape items spanning A2 → C1. Not a calibrated diagnostic (use the <a href="{{ '/practice/#diagnostic' | relative_url }}">8-item placement</a> for that), but a fast vibe-check that decides which door to walk through next.
+      </p>
+    </div>
+    <div class="quickquiz" id="quickquiz" aria-live="polite">
+      <p class="quickquiz-eyebrow">Question <span id="qq-i">1</span> of <span id="qq-n">4</span></p>
+      <div class="quickquiz-progress" aria-hidden="true">
+        <span id="qq-p1"></span><span id="qq-p2"></span><span id="qq-p3"></span><span id="qq-p4"></span>
+      </div>
+      <div id="qq-stage"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="section-eyebrow">Mechanics toolkit</p>
+      <h2>The references your daily practice will keep needing.</h2>
+      <p class="section-lede">
+        A new <a href="{{ '/tools/' | relative_url }}">/tools/</a> page bundles the look-ups that interrupt training: a 32-verb conjugator across 7 tenses, a number-to-French converter, a date/time builder, an accent keyboard, and the IPA chart of French phonemes with TTS samples. Open in a side tab when you hit a mechanics blocker.
+      </p>
+    </div>
+    <div class="grid grid-3">
+      <article class="card">
+        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h12"/></svg></span>
+        <h3>Verb conjugator</h3>
+        <p>32 high-frequency verbs (Lonsdale &amp; Le Bras top 30 + two regular models) × 7 tenses including subjunctive and conditional. Sample sentence at NCLC 6–8 register.</p>
+        <a class="card-link" href="{{ '/tools/#conjugator' | relative_url }}">Open conjugator
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </article>
+      <article class="card">
+        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14M5 12h14M5 20h14"/><path d="M9 4v16M15 4v16"/></svg></span>
+        <h3>Numbers, dates, times</h3>
+        <p>Any number 0–1 000 000 → spelled-out French with breath-group hints. Date written and time spoken with cardinal-vs-ordinal first. Built for the CO ambush moments.</p>
+        <a class="card-link" href="{{ '/tools/#numbers' | relative_url }}">Open numbers
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </article>
+      <article class="card">
+        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h12"/></svg></span>
+        <h3>Accents + IPA chart</h3>
+        <p>Clickable accent keys → clipboard. The 36 phonemes of standard French with example minimal pairs. Tap any IPA tile to hear it pronounced.</p>
+        <a class="card-link" href="{{ '/tools/#accents' | relative_url }}">Open helpers
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
         </a>
       </article>
