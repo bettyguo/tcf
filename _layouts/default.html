@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#0c1424" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#fdfaf4" media="(prefers-color-scheme: light)" />
+
+  {%- assign page_title = page.title | default: page.heading_title | default: site.title -%}
+  {%- if page.url == "/" -%}
+    <title>{{ site.title }} — {{ site.tagline }}</title>
+  {%- else -%}
+    <title>{{ page_title }} · {{ site.title }}</title>
+  {%- endif -%}
+
+  <meta name="description" content="{{ page.description | default: site.description | strip_html | strip_newlines | truncate: 160 }}" />
+  <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}" />
+
+  <link rel="preconnect" href="https://rsms.me/" />
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
+
+  <link rel="icon" type="image/svg+xml" href="{{ '/assets/img/favicon.svg' | relative_url }}" />
+
+  {% seo title=false %}
+
+  <script>
+    // Apply persisted theme before paint to avoid flash.
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem("tcf-theme"); } catch (e) {}
+      var t = saved || "auto";
+      document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
+</head>
+<body class="page {% if page.layout %}layout-{{ page.layout }}{% endif %} {% if page.body_class %}{{ page.body_class }}{% endif %}">
+
+  <a class="skip-link" href="#content">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ '/' | relative_url }}" aria-label="tcf-accel home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <defs>
+            <linearGradient id="bg-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="var(--accent)" />
+              <stop offset="100%" stop-color="var(--accent-2)" />
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="32" height="32" rx="8" fill="url(#bg-gradient)" />
+          <path d="M8 12 L16 8 L24 12 L24 22 L16 26 L8 22 Z" fill="none" stroke="white" stroke-width="1.7" stroke-linejoin="round" opacity="0.92" />
+          <circle cx="16" cy="17" r="2.2" fill="white" />
+        </svg>
+        <span class="brand-text">
+          <span class="brand-name">tcf-accel</span>
+          <span class="brand-tag">v1.0.0</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+        <ul id="nav-menu" class="nav-menu">
+          {%- for item in site.nav -%}
+            {%- assign current = false -%}
+            {%- if page.url contains item.url and item.url != "/" -%}{%- assign current = true -%}{%- endif -%}
+            <li class="nav-item">
+              <a
+                href="{%- if item.external -%}{{ item.url }}{%- else -%}{{ item.url | relative_url }}{%- endif -%}"
+                class="nav-link {% if current %}is-current{% endif %}"
+                {% if item.external %}target="_blank" rel="noopener"{% endif %}
+              >
+                {{ item.title }}
+                {%- if item.external -%}
+                  <svg class="ext-icon" viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M6 3H3v10h10V10M9 3h4v4M7 9l6-6"/></svg>
+                {%- endif -%}
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+        <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+          <svg class="theme-icon theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="M4.9 4.9l2.1 2.1"/><path d="M17 17l2.1 2.1"/><path d="M4.9 19.1l2.1-2.1"/><path d="M17 7l2.1-2.1"/></g></svg>
+          <svg class="theme-icon theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 14.5A8.5 8.5 0 0 1 9.5 3a1 1 0 0 0-1.3-1.3A10 10 0 1 0 22.3 15.8a1 1 0 0 0-1.3-1.3z"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content" class="site-main">
+    {%- if page.layout == 'landing' -%}
+      {{ content }}
+    {%- else -%}
+      <article class="container prose">
+        {%- unless page.suppress_title -%}
+          <header class="page-header">
+            {%- if page.eyebrow -%}<p class="eyebrow">{{ page.eyebrow }}</p>{%- endif -%}
+            {%- if page.title -%}<h1 class="page-title">{{ page.title }}</h1>{%- endif -%}
+            {%- if page.subtitle -%}<p class="page-subtitle">{{ page.subtitle }}</p>{%- endif -%}
+          </header>
+        {%- endunless -%}
+        {{ content }}
+      </article>
+    {%- endif -%}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <a class="brand" href="{{ '/' | relative_url }}">
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <rect x="0" y="0" width="32" height="32" rx="8" fill="var(--accent)"/>
+            <path d="M8 12 L16 8 L24 12 L24 22 L16 26 L8 22 Z" fill="none" stroke="white" stroke-width="1.7" stroke-linejoin="round" opacity="0.92"/>
+            <circle cx="16" cy="17" r="2.2" fill="white"/>
+          </svg>
+          <span class="brand-text"><span class="brand-name">tcf-accel</span></span>
+        </a>
+        <p class="footer-blurb">{{ site.tagline }} <a href="{{ '/LIMITATIONS/' | relative_url }}">Read the limitations</a> before you read anything else.</p>
+        <p class="footer-meta">v1.0.0 · MIT (code) · CC BY-SA 4.0 (content) · Pre-pilot. <a href="{{ site.release_url }}" target="_blank" rel="noopener">Release notes ↗</a></p>
+      </div>
+      <div class="footer-cols">
+        {%- for group in site.footer -%}
+          <div class="footer-col">
+            <h4>{{ group.title }}</h4>
+            <ul>
+              {%- for l in group.links -%}
+                <li><a href="{%- if l.url contains '://' -%}{{ l.url }}{%- else -%}{{ l.url | relative_url }}{%- endif -%}" {% if l.url contains '://' %}target="_blank" rel="noopener"{% endif %}>{{ l.title }}</a></li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+    <div class="container footer-rule">
+      <p>The runtime application is not hosted here. To run the live system, see <a href="{{ '/OPERATIONS/' | relative_url }}">OPERATIONS.md</a>.</p>
+    </div>
+  </footer>
+
+  <script src="{{ '/assets/js/site.js' | relative_url }}" defer></script>
+  {%- if page.scripts -%}
+    {%- for s in page.scripts -%}
+      <script src="{{ s | relative_url }}" defer></script>
+    {%- endfor -%}
+  {%- endif -%}
+</body>
+</html>

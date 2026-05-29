@@ -1,40 +1,108 @@
 # Jekyll config for the tcf-accel GitHub Pages docs site.
 #
 # What this site is:
-#   The public-facing docs + "honesty receipts" for tcf-accel v1.0.0.
-#   It renders the launch artefacts (LIMITATIONS, LEARNER_GUIDE, PEDAGOGY,
-#   ARCHITECTURE, OPERATIONS), the signed LAUNCH_READINESS_REPORT, the
-#   ADRs, and the Phase 9 audit dossier (κ table, cohort calibration plot,
-#   security/perf/content audit summaries).
+#   The public-facing docs + "honesty receipts" for tcf-accel v1.0.0,
+#   PLUS a static interactive demo of the system's UI surfaces
+#   (readiness widget, credible interval, plan view).
 #
 # What this site is NOT:
 #   The running application. The FastAPI backend, Celery worker, Postgres,
-#   Redis, and Next.js web app cannot run on GitHub Pages (static-only).
-#   To run the live system, self-host per OPERATIONS.md.
+#   Redis cannot run on GitHub Pages (static-only). To run the live system,
+#   self-host per OPERATIONS.md.
 
 title: "tcf-accel"
-description: "Open-source, evidence-based French training for the TCF Canada. B1 → NCLC 7–9 in 12 weeks. v1.0.0 — honesty receipts."
+tagline: "Open-source, evidence-based French training for the TCF Canada."
+description: "B1 → NCLC 7–9 in 12 weeks. Honest, audited, self-hostable. v1.0.0."
 url: "https://bettyguo.github.io"
 baseurl: "/tcf"
 repository: "bettyguo/tcf"
+github_url: "https://github.com/bettyguo/tcf"
+release_url: "https://github.com/bettyguo/tcf/releases/tag/v1.0.0"
 
-# GitHub Pages built-in theme. Cayman is the project-site default — minimal,
-# fast, and ships with GH Pages by default so the workflow doesn't need
-# bundler / gem resolution.
-theme: jekyll-theme-cayman
+# No theme — we use a hand-crafted layout under _layouts/default.html.
+# The cayman theme is intentionally NOT pulled in; we render every page
+# through our own typography + nav.
+theme:
 
-# Tell Jekyll to convert these into rendered HTML pages.
 markdown: kramdown
+highlighter: rouge
 kramdown:
   input: GFM
   hard_wrap: false
   syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: "code"
+    block:
+      line_numbers: false
 
-# Show GitHub source link in the cayman footer.
-show_downloads: false
+permalink: pretty
 
-# Files / directories Jekyll must NOT process. Everything else under the
-# repo root that ends in .md becomes a page.
+# Plugins. Only GitHub-Pages-allowed plugins work without a custom build.
+plugins:
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-titles-from-headings
+  - jekyll-seo-tag
+
+relative_links:
+  enabled: true
+  collections: true
+
+optional_front_matter:
+  remove_originals: true
+
+titles_from_headings:
+  enabled: true
+  strip_title: false
+  collections: true
+
+# Top navigation. Each entry is rendered in _includes/nav.html.
+# `external: true` marks GitHub-blob links so they get the external icon.
+nav:
+  - title: "Try it"
+    url: /try/
+  - title: "Learners"
+    url: /LIMITATIONS/
+  - title: "Operators"
+    url: /OPERATIONS/
+  - title: "Reviewers"
+    url: /PEDAGOGY/
+  - title: "Architecture"
+    url: /ARCHITECTURE/
+  - title: "Decisions"
+    url: /adrs/
+  - title: "GitHub"
+    url: https://github.com/bettyguo/tcf
+    external: true
+
+# Footer link groups.
+footer:
+  - title: "Read"
+    links:
+      - { title: "Limitations", url: "/LIMITATIONS/" }
+      - { title: "Learner guide", url: "/LEARNER_GUIDE/" }
+      - { title: "Pedagogy dossier", url: "/PEDAGOGY/" }
+      - { title: "Operations runbook", url: "/OPERATIONS/" }
+  - title: "Verify"
+    links:
+      - { title: "Launch Readiness Report", url: "/LAUNCH_READINESS_REPORT/" }
+      - { title: "Pedagogy audit JSON", url: "/data/audit/phase9/pedagogy_audit.json" }
+      - { title: "κ table", url: "/data/calibration/ee.v1.report/" }
+      - { title: "Risk register", url: "/RISK_REGISTER/" }
+  - title: "Build"
+    links:
+      - { title: "Architecture", url: "/ARCHITECTURE/" }
+      - { title: "All 48 ADRs", url: "/adrs/" }
+      - { title: "v1.1 roadmap", url: "/docs/roadmap/v1.1/" }
+      - { title: "Changelog", url: "/CHANGELOG/" }
+  - title: "Project"
+    links:
+      - { title: "GitHub repo", url: "https://github.com/bettyguo/tcf" }
+      - { title: "v1.0.0 release", url: "https://github.com/bettyguo/tcf/releases/tag/v1.0.0" }
+      - { title: "Contributing", url: "https://github.com/bettyguo/tcf/blob/main/CONTRIBUTING.md" }
+      - { title: "Security disclosure", url: "/SECURITY/" }
+
+# Files / directories Jekyll must NOT process.
 exclude:
   - .venv/
   - .git/
@@ -48,6 +116,7 @@ exclude:
   - node_modules/
   - packages/
   - pnpm-workspace.yaml
+  - pnpm-lock.yaml
   - pyproject.toml
   - scripts/
   - tests/
@@ -57,41 +126,4 @@ exclude:
   - "*.toml"
   - "*.cfg"
   - "*.ini"
-
-# Phase docs are kept but rendered behind a quieter UI; we don't want the
-# main nav cluttered with phase{1..9}_{think,design,audit,evaluate}.md
-# entries — they're linked from the relevant section docs.
-
-# Permalinks: keep file paths stable so links from outside (the v1.0.0
-# release post, X threads, etc.) don't break.
-permalink: pretty
-
-# Plugins. Only GitHub-Pages-allowed plugins work without a custom build.
-plugins:
-  - jekyll-relative-links
-  - jekyll-optional-front-matter
-  - jekyll-readme-index
-  - jekyll-titles-from-headings
-
-# jekyll-relative-links rewrites repo-relative .md links to .html so the
-# README's [LIMITATIONS.md](LIMITATIONS.md) renders to [LIMITATIONS](/LIMITATIONS).
-relative_links:
-  enabled: true
-  collections: true
-
-# jekyll-optional-front-matter — process .md files without YAML front matter
-# (so LIMITATIONS.md etc. need no edits).
-optional_front_matter:
-  remove_originals: true
-
-# jekyll-readme-index — use README.md as the directory index.
-readme_index:
-  enabled: true
-  remove_originals: false
-  with_frontmatter: true
-
-# jekyll-titles-from-headings — derive the page <title> from the first H1.
-titles_from_headings:
-  enabled: true
-  strip_title: false
-  collections: true
+  - README-OG.md
