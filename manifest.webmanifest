@@ -1,0 +1,42 @@
+---
+layout: null
+sitemap: false
+permalink: /manifest.webmanifest
+---
+{
+  "name": "tcf-accel — TCF Canada training",
+  "short_name": "tcf-accel",
+  "description": "Open-source, evidence-based French training for the TCF Canada. B1 → NCLC 7–9 in 12 weeks.",
+  "start_url": "{{ '/' | relative_url }}",
+  "scope": "{{ '/' | relative_url }}",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbf6ec",
+  "theme_color": "#1f5f43",
+  "lang": "en",
+  "categories": ["education", "productivity", "reference"],
+  "icons": [
+    { "src": "{{ '/assets/img/favicon.svg' | relative_url }}", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "{{ '/assets/img/icon-maskable.svg' | relative_url }}", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Practice",
+      "short_name": "Practice",
+      "description": "Diagnostic, vocab SRS, dictée, writing, reading",
+      "url": "{{ '/practice/' | relative_url }}"
+    },
+    {
+      "name": "Learn studio",
+      "short_name": "Learn",
+      "description": "NCLC explorer, exam tabs, mock timer",
+      "url": "{{ '/learn/' | relative_url }}"
+    },
+    {
+      "name": "Try readiness widget",
+      "short_name": "Try",
+      "description": "Live demo of the readiness gate",
+      "url": "{{ '/try/' | relative_url }}"
+    }
+  ]
+}

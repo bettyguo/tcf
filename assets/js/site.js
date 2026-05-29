@@ -1,8 +1,18 @@
-// tcf-accel docs site
-// Vanilla JS: nav toggle, theme cycle (auto → light → dark → auto).
-
+/* tcf-accel docs site — global UI:
+ *   • Mobile nav toggle
+ *   • Theme cycle (auto → light → dark → auto)
+ *   • Command palette (Cmd/Ctrl+K) with fuzzy search over pages + actions
+ *   • Keyboard shortcut help (?)
+ *   • Reading progress bar on long docs
+ *   • Auto TOC sidebar on long docs
+ *   • Copy-code buttons on <pre> blocks
+ *   • PWA service-worker registration
+ *   • Toast helper
+ */
 (function () {
-  // Mobile nav toggle.
+  "use strict";
+
+  /* ───────────── Mobile nav toggle ─────────────────────────── */
   var toggle = document.querySelector(".nav-toggle");
   var menu = document.getElementById("nav-menu");
   if (toggle && menu) {
@@ -10,7 +20,6 @@
       var open = menu.classList.toggle("is-open");
       toggle.setAttribute("aria-expanded", open ? "true" : "false");
     });
-    // Close menu when a link is clicked (so SPA-style navigation feels right).
     menu.addEventListener("click", function (e) {
       if (e.target.closest("a")) {
         menu.classList.remove("is-open");
@@ -19,7 +28,7 @@
     });
   }
 
-  // Theme cycle: auto → light → dark → auto.
+  /* ───────────── Theme cycle ───────────────────────────────── */
   var themeToggle = document.querySelector(".theme-toggle");
   if (themeToggle) {
     themeToggle.addEventListener("click", function () {
@@ -28,6 +37,396 @@
       document.documentElement.setAttribute("data-theme", next);
       try { localStorage.setItem("tcf-theme", next); } catch (e) {}
       themeToggle.setAttribute("title", "Theme: " + next);
+      toast("Theme: " + next);
+    });
+  }
+
+  /* ───────────── Toast helper ──────────────────────────────── */
+  var toastEl = null;
+  function toast(msg, ms) {
+    if (!toastEl) {
+      toastEl = document.createElement("div");
+      toastEl.className = "toast";
+      toastEl.setAttribute("role", "status");
+      toastEl.setAttribute("aria-live", "polite");
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = msg;
+    toastEl.classList.add("is-visible");
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(function () { toastEl.classList.remove("is-visible"); }, ms || 1600);
+  }
+  window.tcfToast = toast;
+
+  /* ───────────── Site base for fetch URLs ──────────────────── */
+  // Try to detect baseurl by checking the canonical link.
+  var canon = document.querySelector('link[rel="canonical"]');
+  if (canon) {
+    var path = new URL(canon.href).pathname;
+    // The baseurl is everything before the page URL.
+    var pageUrl = window.location.pathname;
+    var base = "";
+    if (pageUrl !== path) {
+      // Different — assume canonical reflects the right base.
+      var idx = path.indexOf(pageUrl.split("/").filter(Boolean)[0] || "");
+      if (idx > 0) base = path.substring(0, idx).replace(/\/$/, "");
+    }
+    // Easier: grab any nav link starting with /xxx/ — its prefix is baseurl.
+    var anyNav = document.querySelector('.nav-link[href^="/"]');
+    if (anyNav) {
+      var href = anyNav.getAttribute("href");
+      // e.g. /tcf/practice/ → baseurl = /tcf
+      var parts = href.split("/").filter(Boolean);
+      if (parts.length > 1 && href.indexOf("/" + parts[0] + "/") === 0) {
+        // Could be either /tcf/practice/ or /practice/ depending on setup.
+        // Test: does the path actually start with /tcf?
+        if (window.location.pathname.indexOf("/" + parts[0]) === 0) {
+          base = "/" + parts[0];
+        }
+      }
+    }
+    window.SITE_BASE = base;
+  }
+
+  /* ───────────── Reading progress bar (on prose pages) ─────── */
+  var article = document.querySelector(".prose");
+  if (article && article.offsetHeight > window.innerHeight * 1.4) {
+    var bar = document.createElement("div");
+    bar.className = "reading-progress";
+    bar.innerHTML = '<div class="reading-progress-fg" id="reading-progress-fg"></div>';
+    document.body.appendChild(bar);
+    var fg = document.getElementById("reading-progress-fg");
+    var rafQueued = false;
+    function updateBar() {
+      rafQueued = false;
+      var top = window.scrollY;
+      var docH = document.documentElement.scrollHeight - window.innerHeight;
+      var pct = docH > 0 ? Math.max(0, Math.min(100, (top / docH) * 100)) : 0;
+      fg.style.width = pct + "%";
+    }
+    window.addEventListener("scroll", function () {
+      if (!rafQueued) { rafQueued = true; requestAnimationFrame(updateBar); }
+    }, { passive: true });
+    updateBar();
+  }
+
+  /* ───────────── Copy-code buttons on <pre> ─────────────────── */
+  document.querySelectorAll(".prose pre").forEach(function (pre) {
+    if (pre.parentElement && pre.parentElement.classList.contains("code-block-wrap")) return;
+    var wrap = document.createElement("div");
+    wrap.className = "code-block-wrap";
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-code-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function () {
+      var txt = pre.innerText;
+      try {
+        navigator.clipboard.writeText(txt).then(function () {
+          btn.classList.add("is-copied");
+          btn.textContent = "Copied!";
+          setTimeout(function () { btn.classList.remove("is-copied"); btn.textContent = "Copy"; }, 1200);
+        });
+      } catch (e) {
+        window.prompt("Copy code:", txt);
+      }
+    });
+    wrap.appendChild(btn);
+  });
+
+  /* ───────────── TOC sidebar (on long prose pages) ─────────── */
+  if (article && article.offsetHeight > window.innerHeight * 2) {
+    var headings = article.querySelectorAll("h2[id], h3[id], h4[id]");
+    if (headings.length >= 4 && window.innerWidth >= 1280) {
+      var toc = document.createElement("aside");
+      toc.className = "doc-toc";
+      toc.setAttribute("aria-label", "Page contents");
+      var html = '<h4>On this page</h4><ol>';
+      headings.forEach(function (h) {
+        var cls = "toc-" + h.tagName.toLowerCase();
+        html += '<li><a href="#' + h.id + '" class="' + cls + '">' + h.textContent + "</a></li>";
+      });
+      html += '</ol>';
+      toc.innerHTML = html;
+      // Float the TOC to the right of the prose.
+      var wrap = document.createElement("div");
+      wrap.style.position = "fixed";
+      wrap.style.top = "0";
+      wrap.style.right = "16px";
+      wrap.style.width = "220px";
+      wrap.style.height = "100vh";
+      wrap.style.pointerEvents = "none";
+      wrap.style.zIndex = "5";
+      toc.style.pointerEvents = "auto";
+      wrap.appendChild(toc);
+      document.body.appendChild(wrap);
+
+      var current = null;
+      var raf2 = false;
+      function updateTocActive() {
+        raf2 = false;
+        var y = window.scrollY + (parseInt(getComputedStyle(document.documentElement).getPropertyValue("--header-h"), 10) || 64) + 24;
+        var active = null;
+        for (var i = 0; i < headings.length; i++) {
+          var rect = headings[i].getBoundingClientRect();
+          var top = rect.top + window.scrollY;
+          if (top <= y) active = headings[i];
+          else break;
+        }
+        if (active !== current) {
+          current = active;
+          toc.querySelectorAll("a").forEach(function (a) { a.classList.remove("is-active"); });
+          if (active) {
+            var a = toc.querySelector('a[href="#' + active.id + '"]');
+            if (a) a.classList.add("is-active");
+          }
+        }
+      }
+      window.addEventListener("scroll", function () {
+        if (!raf2) { raf2 = true; requestAnimationFrame(updateTocActive); }
+      }, { passive: true });
+      updateTocActive();
+    }
+  }
+
+  /* ───────────── Command palette (Cmd/Ctrl+K) ──────────────── */
+  // Static command index — always available. Page index is loaded lazily.
+  var COMMANDS = [
+    { title: "Practice", desc: "Diagnostic, vocab SRS, dictée, writing, reading", icon: "play", url: "/practice/", group: "Pages", keywords: "drills exercises srs flashcards" },
+    { title: "Learner studio", desc: "NCLC explorer, exam tabs, mock timer, trajectory", icon: "book", url: "/learn/", group: "Pages", keywords: "interactive nclc" },
+    { title: "Try the readiness widget", desc: "Live demo of the readiness gate", icon: "play", url: "/try/", group: "Pages", keywords: "demo readiness gate ci interval" },
+    { title: "Limitations", desc: "Twelve things this system does not promise", icon: "warn", url: "/LIMITATIONS/", group: "Pages", keywords: "honesty disclaimers" },
+    { title: "Pedagogy dossier", desc: "Eight SLA principles, evidence, receipts", icon: "book", url: "/PEDAGOGY/", group: "Pages", keywords: "pedagogy sla evidence" },
+    { title: "Architecture", desc: "Eight surfaces, ADR-indexed", icon: "layers", url: "/ARCHITECTURE/", group: "Pages", keywords: "system design" },
+    { title: "Operations runbook", desc: "Self-hosting, env vars, backups", icon: "settings", url: "/OPERATIONS/", group: "Pages", keywords: "ops docker helm" },
+    { title: "Learner guide", desc: "12-week journey, week by week", icon: "calendar", url: "/LEARNER_GUIDE/", group: "Pages", keywords: "week plan" },
+    { title: "All 48 ADRs", desc: "Architecture decision records", icon: "list", url: "/adrs/", group: "Pages", keywords: "decisions rationale" },
+    { title: "Launch Readiness Report (signed)", desc: "12 gates green; bundle SHA-256", icon: "check", url: "/LAUNCH_READINESS_REPORT/", group: "Pages", keywords: "audit verify" },
+    { title: "Risk register", desc: "Zero Open; every Accepted has rationale", icon: "warn", url: "/RISK_REGISTER/", group: "Pages", keywords: "risks register" },
+    { title: "Changelog", desc: "v1.0.0 → today", icon: "list", url: "/CHANGELOG/", group: "Pages", keywords: "history release" },
+    { title: "Security disclosure", desc: "Responsible disclosure process", icon: "shield", url: "/SECURITY/", group: "Pages", keywords: "security cve" },
+    { title: "Contributing guide", desc: "How to send a PR", icon: "git", url: "/CONTRIBUTING/", group: "Pages", keywords: "contribute pr" },
+    { title: "Search", desc: "Full-text across all docs", icon: "search", url: "/search/", group: "Pages", keywords: "find" },
+
+    { title: "Toggle theme", desc: "Light / dark / auto", icon: "sun", action: "theme", group: "Actions", keywords: "dark light mode" },
+    { title: "Show keyboard shortcuts", desc: "Press ? from anywhere", icon: "kbd", action: "help", group: "Actions", keywords: "help kbd hotkeys" },
+    { title: "Open GitHub repo", desc: "github.com/bettyguo/tcf", icon: "git", external: "https://github.com/bettyguo/tcf", group: "External", keywords: "github source code" },
+    { title: "v1.0.0 release notes", desc: "GitHub release", icon: "git", external: "https://github.com/bettyguo/tcf/releases/tag/v1.0.0", group: "External", keywords: "release notes" }
+  ];
+
+  var ICONS = {
+    play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>',
+    book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-1.5z"/><path d="M8 7h8M8 11h8"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
+    layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    git: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M6 15V9a6 6 0 0 1 12 0v0"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>',
+    kbd: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h12"/></svg>'
+  };
+
+  var palette = null;
+  var paletteItems = [];
+  var activeIdx = 0;
+  var pageIndex = null;
+  var pageIndexLoading = false;
+
+  function loadPageIndex() {
+    if (pageIndex || pageIndexLoading) return;
+    pageIndexLoading = true;
+    var url = (window.SITE_BASE || "") + "/search-index.json";
+    fetch(url, { cache: "force-cache" }).then(function (r) { return r.json(); }).then(function (raw) {
+      pageIndex = raw.map(function (p) { return { title: p.title, url: p.url, desc: p.excerpt || "", group: "Doc", body: (p.body || "").slice(0, 1000) }; });
+    }).catch(function () { pageIndex = []; });
+  }
+
+  function scoreItem(item, q) {
+    if (!q) return 0;
+    var t = (item.title || "").toLowerCase();
+    var d = (item.desc || "").toLowerCase();
+    var k = (item.keywords || "").toLowerCase();
+    var ql = q.toLowerCase();
+    if (t.indexOf(ql) >= 0) return 100 - t.indexOf(ql);
+    if (k.indexOf(ql) >= 0) return 60;
+    if (d.indexOf(ql) >= 0) return 40;
+    // Fuzzy match: every char of q appears in t in order.
+    var i = 0;
+    for (var j = 0; j < t.length && i < ql.length; j++) {
+      if (t[j] === ql[i]) i++;
+    }
+    if (i === ql.length) return 20;
+    return 0;
+  }
+
+  function openPalette() {
+    if (palette) return;
+    palette = document.createElement("div");
+    palette.className = "cmdk-backdrop";
+    palette.innerHTML =
+      '<div class="cmdk-panel" role="dialog" aria-label="Command palette">' +
+      '  <div class="cmdk-input-wrap">' +
+      '    <span class="cmdk-input-icon">' + ICONS.search + '</span>' +
+      '    <input class="cmdk-input" type="text" placeholder="Search docs or jump to a page…" autocomplete="off" />' +
+      '    <span class="cmdk-hint"><span class="kbd">esc</span></span>' +
+      '  </div>' +
+      '  <div class="cmdk-results" id="cmdk-results" role="listbox"></div>' +
+      '  <div class="cmdk-footer"><span><span class="kbd">↑↓</span> navigate</span><span><span class="kbd">⏎</span> open</span><span><span class="kbd">esc</span> close</span></div>' +
+      '</div>';
+    document.body.appendChild(palette);
+    var input = palette.querySelector(".cmdk-input");
+    var results = palette.querySelector("#cmdk-results");
+
+    function render() {
+      var q = input.value.trim();
+      var pool = COMMANDS.concat(pageIndex || []);
+      var scored = pool.map(function (it) { return { item: it, score: q ? scoreItem(it, q) : (it.group === "Pages" ? 1 : 0) }; })
+        .filter(function (x) { return q ? x.score > 0 : true; });
+      scored.sort(function (a, b) { return b.score - a.score; });
+      paletteItems = scored.slice(0, 20).map(function (x) { return x.item; });
+      activeIdx = 0;
+      if (!paletteItems.length) {
+        results.innerHTML = '<p class="cmdk-empty">No matches. Try a broader term.</p>';
+        return;
+      }
+      var groups = {};
+      paletteItems.forEach(function (it) {
+        var g = it.group || "Other";
+        if (!groups[g]) groups[g] = [];
+        groups[g].push(it);
+      });
+      var html = "";
+      Object.keys(groups).forEach(function (g) {
+        html += '<p class="cmdk-group-title">' + g + '</p>';
+        groups[g].forEach(function (it) {
+          var idx = paletteItems.indexOf(it);
+          var icon = ICONS[it.icon || "list"] || ICONS.list;
+          html += '<div class="cmdk-item' + (idx === activeIdx ? " is-active" : "") + '" data-idx="' + idx + '" role="option">' +
+            '<span class="cmdk-item-icon">' + icon + '</span>' +
+            '<div><div class="cmdk-item-title">' + it.title + '</div>' +
+            (it.desc ? '<div class="cmdk-item-desc">' + it.desc + '</div>' : '') + '</div>' +
+            (it.external ? '<span class="cmdk-item-meta">↗</span>' : '<span class="cmdk-item-meta">' + (it.url || "") + '</span>') +
+            '</div>';
+        });
+      });
+      results.innerHTML = html;
+      results.querySelectorAll(".cmdk-item").forEach(function (el) {
+        el.addEventListener("click", function () { exec(parseInt(el.dataset.idx, 10)); });
+        el.addEventListener("mouseenter", function () {
+          activeIdx = parseInt(el.dataset.idx, 10);
+          results.querySelectorAll(".cmdk-item").forEach(function (e2) { e2.classList.toggle("is-active", parseInt(e2.dataset.idx, 10) === activeIdx); });
+        });
+      });
+    }
+    function updateActive() {
+      results.querySelectorAll(".cmdk-item").forEach(function (el) {
+        el.classList.toggle("is-active", parseInt(el.dataset.idx, 10) === activeIdx);
+      });
+      var act = results.querySelector(".cmdk-item.is-active");
+      if (act) act.scrollIntoView({ block: "nearest" });
+    }
+    function exec(idx) {
+      var it = paletteItems[idx];
+      if (!it) return;
+      closePalette();
+      if (it.action === "theme") { themeToggle && themeToggle.click(); return; }
+      if (it.action === "help") { showHelpModal(); return; }
+      if (it.external) { window.open(it.external, "_blank", "noopener"); return; }
+      if (it.url) window.location.href = (window.SITE_BASE || "") + it.url.replace(window.SITE_BASE || "", "");
+    }
+
+    input.addEventListener("input", render);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown") { e.preventDefault(); activeIdx = Math.min(paletteItems.length - 1, activeIdx + 1); updateActive(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); activeIdx = Math.max(0, activeIdx - 1); updateActive(); }
+      else if (e.key === "Enter") { e.preventDefault(); exec(activeIdx); }
+      else if (e.key === "Escape") { e.preventDefault(); closePalette(); }
+    });
+    palette.addEventListener("click", function (e) { if (e.target === palette) closePalette(); });
+    loadPageIndex();
+    render();
+    setTimeout(function () { input.focus(); }, 30);
+  }
+  function closePalette() {
+    if (!palette) return;
+    palette.remove(); palette = null;
+  }
+
+  /* ───────────── Keyboard shortcut help (?) ──────────────── */
+  function showHelpModal() {
+    var existing = document.querySelector(".kbd-modal-backdrop");
+    if (existing) { existing.remove(); return; }
+    var m = document.createElement("div");
+    m.className = "kbd-modal-backdrop";
+    m.innerHTML =
+      '<div class="kbd-modal" role="dialog" aria-label="Keyboard shortcuts">' +
+      '  <h3>Keyboard shortcuts</h3>' +
+      '  <table><tbody>' +
+      '    <tr><td>Command palette</td><td><span class="kbd">⌘</span> <span class="kbd">K</span> · <span class="kbd">Ctrl</span> <span class="kbd">K</span></td></tr>' +
+      '    <tr><td>Search</td><td><span class="kbd">/</span></td></tr>' +
+      '    <tr><td>This help</td><td><span class="kbd">?</span></td></tr>' +
+      '    <tr><td>Theme cycle</td><td><span class="kbd">⌘</span> <span class="kbd">⇧</span> <span class="kbd">D</span></td></tr>' +
+      '    <tr><td>Home</td><td><span class="kbd">g</span> <span class="kbd">h</span></td></tr>' +
+      '    <tr><td>Practice</td><td><span class="kbd">g</span> <span class="kbd">p</span></td></tr>' +
+      '    <tr><td>Try it</td><td><span class="kbd">g</span> <span class="kbd">t</span></td></tr>' +
+      '    <tr><td>Learn studio</td><td><span class="kbd">g</span> <span class="kbd">l</span></td></tr>' +
+      '    <tr><td>Close any overlay</td><td><span class="kbd">esc</span></td></tr>' +
+      '  </tbody></table>' +
+      '  <button class="kbd-modal-close" type="button">Close</button>' +
+      '</div>';
+    document.body.appendChild(m);
+    m.addEventListener("click", function (e) { if (e.target === m) m.remove(); });
+    m.querySelector(".kbd-modal-close").addEventListener("click", function () { m.remove(); });
+  }
+
+  /* ───────────── Global hotkeys ───────────────────────────── */
+  var lastG = 0;
+  document.addEventListener("keydown", function (e) {
+    var inField = e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable);
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      if (palette) closePalette(); else openPalette();
+      return;
+    }
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "d") {
+      e.preventDefault();
+      themeToggle && themeToggle.click();
+      return;
+    }
+    if (inField) return;
+    if (e.key === "?" && !palette) { e.preventDefault(); showHelpModal(); return; }
+    if (e.key === "/" && !palette && !document.querySelector(".search-box input")) {
+      e.preventDefault(); openPalette(); return;
+    }
+    if (e.key === "Escape") {
+      if (palette) closePalette();
+      var hm = document.querySelector(".kbd-modal-backdrop");
+      if (hm) hm.remove();
+      return;
+    }
+    // g-prefix shortcuts: gh, gp, gt, gl
+    if (e.key === "g") { lastG = Date.now(); return; }
+    if (lastG && (Date.now() - lastG) < 1100) {
+      var targets = { h: "/", p: "/practice/", t: "/try/", l: "/learn/", a: "/adrs/", s: "/search/" };
+      var t = targets[e.key.toLowerCase()];
+      if (t) { e.preventDefault(); window.location.href = (window.SITE_BASE || "") + t; }
+      lastG = 0;
+    }
+  });
+
+  /* ───────────── PWA service-worker registration ──────────── */
+  if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
+    window.addEventListener("load", function () {
+      var swUrl = (window.SITE_BASE || "") + "/sw.js";
+      navigator.serviceWorker.register(swUrl, { scope: (window.SITE_BASE || "") + "/" })
+        .catch(function () { /* SW optional */ });
     });
   }
 })();

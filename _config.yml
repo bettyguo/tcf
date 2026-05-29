@@ -19,6 +19,16 @@ repository: "bettyguo/tcf"
 github_url: "https://github.com/bettyguo/tcf"
 release_url: "https://github.com/bettyguo/tcf/releases/tag/v1.0.0"
 
+# Default OG/Twitter card image — jekyll-seo-tag picks this up.
+image: /assets/img/og-card.svg
+twitter:
+  card: summary_large_image
+  username: bettyguo
+social:
+  name: tcf-accel
+  links:
+    - https://github.com/bettyguo/tcf
+
 # No theme — we use a hand-crafted layout under _layouts/default.html.
 # The cayman theme is intentionally NOT pulled in; we render every page
 # through our own typography + nav.
@@ -59,16 +69,14 @@ titles_from_headings:
 # Top navigation. Each entry is rendered in _includes/nav.html.
 # `external: true` marks GitHub-blob links so they get the external icon.
 nav:
-  - title: "Try it"
-    url: /try/
+  - title: "Practice"
+    url: /practice/
   - title: "Learn"
     url: /learn/
+  - title: "Try it"
+    url: /try/
   - title: "Limitations"
     url: /LIMITATIONS/
-  - title: "Operators"
-    url: /OPERATIONS/
-  - title: "Reviewers"
-    url: /PEDAGOGY/
   - title: "Decisions"
     url: /adrs/
   - title: "GitHub"
@@ -83,7 +91,9 @@ footer:
       - { title: "Learner guide", url: "/LEARNER_GUIDE/" }
       - { title: "Pedagogy dossier", url: "/PEDAGOGY/" }
       - { title: "Operations runbook", url: "/OPERATIONS/" }
+      - { title: "Practice (interactive)", url: "/practice/" }
       - { title: "Learner studio (interactive)", url: "/learn/" }
+      - { title: "Search", url: "/search/" }
   - title: "Verify"
     links:
       - { title: "Launch Readiness Report", url: "/LAUNCH_READINESS_REPORT/" }

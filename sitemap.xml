@@ -1,0 +1,28 @@
+---
+layout: null
+sitemap: false
+permalink: /sitemap.xml
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{%- for p in site.pages -%}
+  {%- if p.sitemap == false -%}{%- continue -%}{%- endif -%}
+  {%- assign u = p.url -%}
+  {%- if u contains ".json" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".xml" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".webmanifest" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".txt" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".js" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".css" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".svg" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".png" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains "404" -%}{%- continue -%}{%- endif -%}
+  <url>
+    <loc>{{ p.url | absolute_url }}</loc>
+    {%- if p.url == "/" -%}<priority>1.0</priority>
+    {%- elsif p.url contains "/practice/" or p.url contains "/learn/" or p.url contains "/try/" or p.url contains "LIMITATIONS" -%}<priority>0.9</priority>
+    {%- else -%}<priority>0.7</priority>{%- endif -%}
+    <changefreq>weekly</changefreq>
+  </url>
+{%- endfor -%}
+</urlset>

@@ -14,12 +14,12 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
           Open-source, evidence-aligned French training for the TCF Canada — with a readiness signal that refuses to lie to you about whether you're ready to book.
         </p>
         <div class="hero-cta">
-          <a class="btn btn-primary" href="{{ '/learn/' | relative_url }}">
-            Open the learner studio
+          <a class="btn btn-primary" href="{{ '/practice/' | relative_url }}">
+            Start practising — free
             <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 8h10M9 4l4 4-4 4"/></svg>
           </a>
-          <a class="btn btn-secondary" href="{{ '/try/' | relative_url }}">
-            Try the readiness widget
+          <a class="btn btn-secondary" href="{{ '/learn/' | relative_url }}">
+            Open the learner studio
           </a>
           <a class="btn btn-ghost" href="{{ '/LIMITATIONS/' | relative_url }}">
             Read the limitations first
@@ -127,6 +127,68 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
         <h3>48 ADRs, 0 hand-waves</h3>
         <p>Every load-bearing design decision has a written rationale. Trade-offs explicit, not implicit.</p>
         <a class="card-link" href="{{ '/adrs/' | relative_url }}">All decisions
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="section-eyebrow">Interactive — five real drills</p>
+      <h2>Train in your browser, today, for free.</h2>
+      <p class="section-lede">
+        The practice page bundles a diagnostic placement, an SM-2 spaced-repetition vocabulary deck (240 cards), a single-play listening dictée with word-level diff, a timed EE writing pad, and a reading-speed test with comprehension grading. No backend, no signup, your progress lives in your browser.
+      </p>
+    </div>
+    <div class="grid grid-3">
+      <article class="card">
+        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 11l2 2 4-4"/></svg></span>
+        <h3>① Diagnostic placement</h3>
+        <p>8 calibrated items → per-skill NCLC point estimate with wide credible intervals (ADR-025). Takes 10 minutes.</p>
+        <a class="card-link" href="{{ '/practice/#diagnostic' | relative_url }}">Take the placement
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </article>
+      <article class="card">
+        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M8 4v14M16 4v14"/></svg></span>
+        <h3>② SRS vocabulary</h3>
+        <p>240 essential B1–B2 cards across 5 topical decks (Express Entry, work, school, daily life, connectors). SM-2 algorithm.</p>
+        <a class="card-link" href="{{ '/practice/#vocab' | relative_url }}">Open the deck
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </article>
+      <article class="card">
+        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3v4M3 19a2 2 0 0 0 2 2h1v-6H3v4z"/></svg></span>
+        <h3>③ Listening dictée</h3>
+        <p>Single-play TCF cadence (ADR-029). Web Speech TTS reads the passage; you transcribe. Word-level diff with accent grading.</p>
+        <a class="card-link" href="{{ '/practice/#listening' | relative_url }}">Run a dictée
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </article>
+      <article class="card">
+        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+        <h3>④ Timed writing</h3>
+        <p>EE-shape T1/T2/T3 prompts with live word count, register coach, and the deterministic under-length penalty (ADR-028) made visible.</p>
+        <a class="card-link" href="{{ '/practice/#writing' | relative_url }}">Start a prompt
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </article>
+      <article class="card">
+        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <h3>⑤ Reading speed</h3>
+        <p>WPM on B1/B2/C1 passages with 3-question comprehension. Hit ≥150 wpm with ≥2/3 to stay on T4-pace.</p>
+        <a class="card-link" href="{{ '/practice/#reading' | relative_url }}">Test your pace
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </article>
+      <article class="card">
+        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg></span>
+        <h3>Your stats</h3>
+        <p>Streak heatmap, total minutes, vocab learned, dictée pass rate, median WPM. All in <code>localStorage</code>. Exportable JSON.</p>
+        <a class="card-link" href="{{ '/practice/#stats' | relative_url }}">View dashboard
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
         </a>
       </article>

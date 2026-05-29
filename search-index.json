@@ -1,0 +1,30 @@
+---
+layout: null
+sitemap: false
+permalink: /search-index.json
+---
+[
+{%- assign first = true -%}
+{%- for p in site.pages -%}
+  {%- if p.sitemap == false -%}{%- continue -%}{%- endif -%}
+  {%- assign u = p.url -%}
+  {%- if u == "/search/" -%}{%- continue -%}{%- endif -%}
+  {%- if u == "/404.html" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains "search-index" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains "sitemap" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains "robots" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains "manifest" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".js" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".css" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".svg" -%}{%- continue -%}{%- endif -%}
+  {%- if u contains ".png" -%}{%- continue -%}{%- endif -%}
+  {%- assign body = p.content | strip_html | strip_newlines | replace: '\\', '\\\\' | replace: '"', '\"' | replace: '	', ' ' -%}
+  {%- assign title = p.title | default: p.heading_title | default: u -%}
+  {%- assign title = title | replace: '"', '\"' | strip_newlines -%}
+  {%- assign excerpt = p.subtitle | default: p.description | default: '' -%}
+  {%- assign excerpt = excerpt | strip_html | strip_newlines | replace: '"', '\"' | truncate: 220 -%}
+  {%- unless first -%},{%- endunless -%}
+  {%- assign first = false -%}
+{"title": "{{ title }}", "url": "{{ p.url | relative_url }}", "excerpt": "{{ excerpt }}", "body": "{{ body | truncate: 4000 }}"}
+{%- endfor -%}
+]

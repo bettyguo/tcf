@@ -1,0 +1,10 @@
+---
+layout: null
+sitemap: false
+permalink: /robots.txt
+---
+User-agent: *
+Allow: /
+Disallow: /404.html
+
+Sitemap: {{ '/sitemap.xml' | absolute_url }}

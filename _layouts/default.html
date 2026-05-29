@@ -17,13 +17,44 @@
   <meta name="description" content="{{ page.description | default: site.description | strip_html | strip_newlines | truncate: 160 }}" />
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}" />
 
-  <link rel="preconnect" href="https://rsms.me/" />
+  <link rel="preconnect" href="https://rsms.me/" crossorigin />
+  <link rel="dns-prefetch" href="https://rsms.me/" />
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
 
   <link rel="icon" type="image/svg+xml" href="{{ '/assets/img/favicon.svg' | relative_url }}" />
+  <link rel="apple-touch-icon" href="{{ '/assets/img/favicon.svg' | relative_url }}" />
+  <link rel="manifest" href="{{ '/manifest.webmanifest' | relative_url }}" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="tcf-accel" />
+  <meta name="application-name" content="tcf-accel" />
+  <meta name="mobile-web-app-capable" content="yes" />
 
   {% seo title=false %}
+
+  <!-- Structured data (JSON-LD) -->
+  {%- if page.url == "/" -%}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "tcf-accel",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web, Linux, macOS",
+    "description": "{{ site.description | strip_html | strip_newlines | escape }}",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "url": "{{ '/' | absolute_url }}",
+    "softwareVersion": "1.0.0",
+    "license": "https://github.com/bettyguo/tcf/blob/main/LICENSE",
+    "codeRepository": "https://github.com/bettyguo/tcf",
+    "image": "{{ '/assets/img/og-card.svg' | absolute_url }}",
+    "author": { "@type": "Organization", "name": "tcf-accel contributors" },
+    "educationalUse": "preparation for TCF Canada / IRCC French proficiency",
+    "audience": { "@type": "EducationalAudience", "educationalRole": "student" }
+  }
+  </script>
+  {%- endif -%}
 
   <script>
     // Apply persisted theme before paint to avoid flash.
@@ -33,6 +64,8 @@
       var t = saved || "auto";
       document.documentElement.setAttribute("data-theme", t);
     })();
+    // Expose baseurl to client-side scripts.
+    window.SITE_BASE = "{{ site.baseurl | default: '' }}";
   </script>
 </head>
 <body class="page {% if page.layout %}layout-{{ page.layout }}{% endif %} {% if page.body_class %}{{ page.body_class }}{% endif %}">
