@@ -1,0 +1,29 @@
+[project]
+name = "tcf-accel-client"
+version = "0.2.0"
+description = "Python client SDK generated from docs/api/openapi.v1.yaml. Frozen with each SCHEMA_VERSION bump."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+authors = [{ name = "tcf-accel contributors" }]
+
+dependencies = [
+    "tcf-accel-shared",
+    "httpx>=0.27,<1.0",
+    "pydantic>=2.7,<3.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3,<9.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tcf_accel_client"]
+
+[tool.uv.sources]
+tcf-accel-shared = { workspace = true }

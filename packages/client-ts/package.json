@@ -1,0 +1,26 @@
+{
+  "name": "@tcf-accel/client",
+  "version": "0.2.0",
+  "description": "TypeScript client SDK generated from docs/api/openapi.v1.yaml. Frozen with each SCHEMA_VERSION bump.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "generate": "openapi-typescript ../../docs/api/openapi.v1.yaml -o ./src/types.gen.ts",
+    "lint": "eslint src --max-warnings 0",
+    "test": "echo 'no tests in Phase 2'",
+    "format": "prettier --write src"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.13.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.4.0",
+    "typescript": "^5.6.0"
+  }
+}

@@ -41,6 +41,13 @@ dev = [
     # Security audits (Phase 1 audit-security target)
     "pip-audit>=2.7,<3.0",
     "bandit[toml]>=1.7,<2.0",
+    # Phase 2: DB + migrations + contract tests
+    "alembic>=1.13,<2.0",
+    "sqlalchemy>=2.0,<3.0",
+    "asyncpg>=0.29,<1.0",
+    "psycopg[binary]>=3.2,<4.0",
+    "schemathesis>=3.39,<4.0",
+    "pyyaml>=6.0,<7.0",
 ]
 
 [tool.uv]
@@ -54,6 +61,7 @@ members = [
     "packages/sla",
     "packages/ml",
     "packages/content",
+    "packages/client-py",
 ]
 
 [tool.uv.sources]
@@ -70,6 +78,11 @@ target-version = "py312"
 extend-exclude = [".venv", "node_modules", "data", "infra/migrations/versions"]
 
 [tool.ruff.lint]
+# Mathematical and pedagogical notation is load-bearing in the Phase 4 SLA
+# package (Greek letters for distribution params; × for "times"; – for
+# en-dash ranges). Whitelisting keeps the math readable without per-line
+# noqa noise.
+allowed-confusables = ["σ", "μ", "α", "β", "θ", "Φ", "ε", "×", "–"]
 select = [
     "E", "F", "W",        # pycodestyle / pyflakes
     "I",                  # isort
@@ -137,7 +150,7 @@ disallow_incomplete_defs = false
 # ─── Pytest ────────────────────────────────────────────────────
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra --strict-markers --strict-config"
+addopts = "-ra --strict-markers --strict-config --import-mode=importlib"
 asyncio_mode = "auto"
 testpaths = ["tests", "apps", "packages"]
 python_files = ["test_*.py", "*_test.py"]
@@ -155,6 +168,12 @@ markers = [
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning:pydantic.*",
+    # Pydantic v2 warns when a field name shadows a BaseModel attribute (e.g., `register`).
+    # The shadow is harmless at runtime; the JSON shape is what the OpenAPI contract pins.
+    "ignore:Field name .* shadows an attribute in parent .*:UserWarning:pydantic.*",
+    # Third-party deprecation noise unrelated to our code; Phase 2 audits track upstreams.
+    "ignore::DeprecationWarning:jsonschema.*",
+    "ignore::DeprecationWarning:schemathesis.*",
 ]
 
 # ─── Coverage ──────────────────────────────────────────────────

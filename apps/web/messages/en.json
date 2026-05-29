@@ -1,0 +1,149 @@
+{
+  "app": {
+    "title": "tcf-accel",
+    "tagline": "Evidence-based TCF Canada prep."
+  },
+  "nav": {
+    "today": "Today",
+    "insights": "Insights",
+    "library": "Library",
+    "settings": "Settings"
+  },
+  "today": {
+    "greeting": "Hello, {name}.",
+    "dayCounter": "Day {day} of {total} • {remaining} remaining today",
+    "block": {
+      "start": "Start",
+      "resume": "Resume",
+      "minutes": "{count} min"
+    },
+    "priorityTag": "priority",
+    "whyThisPlan": "Why this plan today?",
+    "noBlocks": "No blocks scheduled. Plan something in Insights.",
+    "resumeBanner": "You have a session in progress."
+  },
+  "insights": {
+    "title": "Insights",
+    "readinessTitle": "Readiness",
+    "minSkill": "Min skill: {skill} = NCLC {value} (CI {lower}–{upper})",
+    "target": "Target: NCLC {value}",
+    "probability": "P(min ≥ target) = {p}",
+    "recommendation": "Recommendation",
+    "perSkillTrajectory": "Per-skill trajectory",
+    "bottleneck": "Bottleneck skill",
+    "floor": "floor",
+    "states": {
+      "INSUFFICIENT_DATA": "Insufficient data",
+      "NOT_READY": "Not ready",
+      "BORDERLINE": "Borderline",
+      "READY_ONE_MOCK": "One mock at green",
+      "READY": "Ready",
+      "REGRESSED": "Regressed"
+    },
+    "recommendations": {
+      "INSUFFICIENT_DATA": "Complete a diagnostic to see where you stand.",
+      "NOT_READY": "Focus on your bottleneck skill. Stay with the plan.",
+      "BORDERLINE": "Run another mock in 7 days. Book the exam only after 2 consecutive green mocks.",
+      "READY_ONE_MOCK": "One green mock down. Run a second canonical mock in 7–10 days to confirm.",
+      "READY": "You meet the readiness bar. You can book your exam.",
+      "REGRESSED": "Your latest mock dropped below target. Run another in 7–14 days before booking."
+    }
+  },
+  "drill": {
+    "play": "Play audio",
+    "pause": "Pause audio",
+    "replay": "Replay",
+    "submit": "Submit",
+    "next": "Next",
+    "end": "End session",
+    "rationale": "Show rationale",
+    "hideRationale": "Hide rationale",
+    "transcript": "Show transcript",
+    "hideTranscript": "Hide transcript",
+    "timeLeft": "{seconds} seconds left",
+    "answerHere": "Type your answer here",
+    "loading": "Loading next item…",
+    "submitted": "Submitted.",
+    "saveDraft": "Draft saved locally."
+  },
+  "mockExam": {
+    "start": "Start mock exam",
+    "canonical": "Canonical",
+    "training": "Training",
+    "canonicalNote": "Counts toward your readiness check. No transcripts, no rationales, no skip.",
+    "trainingNote": "Practice mode. Transcripts and rationales available post-answer. Does not count toward readiness.",
+    "abandon": "Abandon mock?",
+    "abandonConfirm": "You will lose this attempt. Submit answers so far?",
+    "report": {
+      "headline": "Overall: NCLC {min} (min across skills)",
+      "inflationClamped": "{n} dimension(s) clamped by inflation guard.",
+      "nextSteps": "Top next steps",
+      "kappa": "Model κ: {value} (last calibrated {date})"
+    }
+  },
+  "readiness": {
+    "checklistTitle": "Booking checklist",
+    "checklist": {
+      "diagnostic": "Diagnostic complete",
+      "mock1": "Mock 1 at green",
+      "mock2": "Mock 2 at green — required",
+      "fee": "Exam fee paid",
+      "id": "Government ID ready"
+    }
+  },
+  "library": {
+    "grammar": "Grammar",
+    "vocab": "Vocabulary",
+    "writing": "Writing",
+    "speaking": "Speaking",
+    "culture": "Canadian context",
+    "drillThis": "Drill this"
+  },
+  "settings": {
+    "account": "Account",
+    "privacy": "Privacy",
+    "accessibility": "Accessibility",
+    "notifications": "Notifications",
+    "apiKeys": "API keys",
+    "privacyExplainer": "Your data stays on this device unless you turn on cloud sync.",
+    "syncedItems": "When cloud sync is on, we sync:",
+    "notSyncedItems": "We never sync:",
+    "exportMyData": "Export my data",
+    "deleteAccount": "Delete account",
+    "notificationsDefault": "Notifications are off by default. Most users do best with no reminders at all — your plan is here when you open the app.",
+    "fontSize": "Text size",
+    "contrast": "Contrast",
+    "font": "Font",
+    "motion": "Motion",
+    "captions": "Captions / transcripts default",
+    "language": "Language"
+  },
+  "onboarding": {
+    "goals": {
+      "title": "Set your goal",
+      "targetNclc": "Target NCLC",
+      "examDate": "Exam date (optional)",
+      "dailyBudget": "Daily budget (minutes)",
+      "l1": "Native language (optional)",
+      "next": "Continue"
+    },
+    "diagnostic": {
+      "title": "Diagnostic",
+      "intro": "A short adaptive check across CO, CE, EE, EO so we can plan accurately. About 25 minutes."
+    },
+    "planPreview": {
+      "title": "Your 12-week plan",
+      "accept": "Looks good — start today",
+      "adjust": "Adjust"
+    }
+  },
+  "ci": {
+    "nclcLabel": "NCLC {mean} (CI {lower}–{upper})"
+  },
+  "stubBanner": "This translation is incomplete. English shown where missing.",
+  "errors": {
+    "network": "Connection lost. Your work is saved locally and will sync when you reconnect.",
+    "auth": "Please sign in again.",
+    "generic": "Something went wrong. Please try again."
+  }
+}

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from tcf_accel_worker.celery_app import celery_app
 from tcf_accel_worker.tasks.smoke import ping
 

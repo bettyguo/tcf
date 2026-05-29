@@ -19,7 +19,6 @@ from typing import Literal
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
-
 from tcf_accel.schemas.version import SCHEMA_VERSION
 
 router = APIRouter(tags=["meta"])
@@ -40,4 +39,4 @@ async def healthz() -> HealthResponse:
     Returns:
         A `HealthResponse` with `status="ok"` and the current schema version.
     """
-    return HealthResponse(status="ok", phase=1, schema_version=SCHEMA_VERSION)
+    return HealthResponse(status="ok", phase=2, schema_version=SCHEMA_VERSION)

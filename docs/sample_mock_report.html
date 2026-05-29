@@ -1,0 +1,71 @@
+<!doctype html>
+<html><head><meta charset='utf-8'><title>Mock exam 22222222-2222-4222-9222-222222222222</title><style>body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2em auto; }h1 { border-bottom: 2px solid #333; }h2 { color: #1a4d8c; margin-top: 1.6em; }table { border-collapse: collapse; margin: 1em 0; }td { border: 1px solid #ccc; padding: 0.3em 0.6em; }blockquote { color: #555; border-left: 3px solid #999; padding-left: 0.8em; }</style></head><body>
+<h1>Mock exam report — 22222222-2222-4222-9222-222222222222</h1>
+<p>*Completed 2026-05-28T18:47:00+00:00 — mode: `canonical` — user: `11111111-1111-4111-8111-111111111111`*</p>
+<h2>1. Headline</h2>
+<p>🟢 **GREEN**.</p>
+<p>Overall NCLC **8**, bottleneck **EE**.</p>
+<blockquote>_Likely ready: P(min skill &gt;= NCLC 7) = 85%; weakest skill is EE. Canonical-mock green streak: 2._</blockquote>
+<h2>2. Module breakdown</h2>
+<table>
+<tr><td>Skill</td><td>Raw</td><td>Posterior</td></tr>
+<tr><td>CO</td><td>31/39</td><td>NCLC 8.4 (CI 7–10, n=39)</td></tr>
+<tr><td>CE</td><td>30/39</td><td>NCLC 8.1 (CI 7–9, n=39)</td></tr>
+<tr><td>EE</td><td>14.0/20</td><td>NCLC 7.6 (CI 6–9, n=3)</td></tr>
+<tr><td>EO</td><td>14.7/20</td><td>NCLC 7.9 (CI 7–9, n=3)</td></tr>
+</table>
+<h3>CO per-item</h3>
+<table>
+<tr><td>Item</td><td>CEFR</td><td>Difficulty</td><td>Correct</td><td>RT (ms)</td></tr>
+<tr><td>`00000000`</td><td>A2</td><td>4.00</td><td>✓</td><td>20000</td></tr>
+<tr><td>`00000001`</td><td>B1</td><td>4.30</td><td>✓</td><td>20500</td></tr>
+<tr><td>`00000002`</td><td>B1</td><td>4.60</td><td>✓</td><td>21000</td></tr>
+<tr><td>`00000003`</td><td>B2</td><td>4.90</td><td>✗</td><td>21500</td></tr>
+<tr><td>`00000004`</td><td>B2</td><td>5.20</td><td>✓</td><td>22000</td></tr>
+<tr><td>`00000005`</td><td>C1</td><td>5.50</td><td>✓</td><td>22500</td></tr>
+<tr><td>`00000006`</td><td>C1</td><td>5.80</td><td>✓</td><td>23000</td></tr>
+<tr><td>`00000007`</td><td>C2</td><td>6.10</td><td>✗</td><td>23500</td></tr>
+</table>
+<h3>CE per-item</h3>
+<table>
+<tr><td>Item</td><td>CEFR</td><td>Difficulty</td><td>Correct</td><td>RT (ms)</td></tr>
+<tr><td>`00000064`</td><td>A2</td><td>4.00</td><td>✓</td><td>60000</td></tr>
+<tr><td>`00000065`</td><td>B1</td><td>4.30</td><td>✓</td><td>61000</td></tr>
+<tr><td>`00000066`</td><td>B2</td><td>4.60</td><td>✓</td><td>62000</td></tr>
+<tr><td>`00000067`</td><td>B2</td><td>4.90</td><td>✓</td><td>63000</td></tr>
+<tr><td>`00000068`</td><td>C1</td><td>5.20</td><td>✗</td><td>64000</td></tr>
+<tr><td>`00000069`</td><td>C1</td><td>5.50</td><td>✓</td><td>65000</td></tr>
+<tr><td>`0000006a`</td><td>C2</td><td>5.80</td><td>✓</td><td>66000</td></tr>
+<tr><td>`0000006b`</td><td>C2</td><td>6.10</td><td>✓</td><td>67000</td></tr>
+</table>
+<h2>3. EE report</h2>
+<table>
+<tr><td>Task</td><td>Rubric / 20</td><td>Difficulty</td></tr>
+<tr><td>Task 1</td><td>14.0</td><td>6.00</td></tr>
+<tr><td>Task 2</td><td>13.0</td><td>7.50</td></tr>
+<tr><td>Task 3</td><td>15.0</td><td>9.00</td></tr>
+</table>
+<p>Model improvements per task are surfaced in the writing-feedback UI (Phase 7 + Phase 8). The current rubric scorer is the Phase 5 stub; Phase 7 wires the calibrated scorer.</p>
+<h2>4. EO report</h2>
+<table>
+<tr><td>Task</td><td>Rubric / 20</td><td>Difficulty</td></tr>
+<tr><td>Task 1</td><td>15.0</td><td>6.00</td></tr>
+<tr><td>Task 2</td><td>14.0</td><td>7.50</td></tr>
+<tr><td>Task 3</td><td>15.0</td><td>9.00</td></tr>
+</table>
+<p>Suggested next-step pronunciation drill: `eo_picture` at the bottleneck CEFR band (Phase 8 surfaces the audio player + spectrogram).</p>
+<h2>5. Trajectory</h2>
+<table>
+<tr><td>Skill</td><td>Drill</td><td>Mock</td><td>Δ</td></tr>
+<tr><td>CO</td><td>8.6</td><td>8.4</td><td>-0.2</td></tr>
+<tr><td>CE</td><td>8.3</td><td>8.1</td><td>-0.2</td></tr>
+<tr><td>EE</td><td>7.5</td><td>7.6</td><td>+0.1</td></tr>
+<tr><td>EO</td><td>7.8</td><td>7.9</td><td>+0.1</td></tr>
+</table>
+<h2>6. Actionable plan (top 3)</h2>
+<p>1. **EE** — Connector density below threshold (donc/cependant/néanmoins under-used). Run ee_connector drill at B2 every other day this week.</p>
+<p>2. **CO** — fr-CA accent recognition lags fr-FR by ~12%. Add 15 min/day of fr-CA shadowing for 10 days.</p>
+<p>3. **CE** — Skim-and-scan errors on admin genre passages. Two ce_skim_scan drills against admin items per week.</p>
+<h2>7. Booking advice</h2>
+<p>You have sustained green for ≥ 2 canonical mocks — booking the exam in 2–4 weeks is reasonable.</p>
+</body></html>

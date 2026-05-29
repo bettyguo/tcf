@@ -1,0 +1,23 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "timeout": 30000,
+    "wait": 1000,
+    "chromeLaunchConfig": {
+      "args": ["--no-sandbox"]
+    }
+  },
+  "urls": [
+    "http://localhost:3000/today",
+    "http://localhost:3000/insights",
+    "http://localhost:3000/insights/readiness",
+    "http://localhost:3000/library",
+    "http://localhost:3000/library/grammar",
+    "http://localhost:3000/settings/privacy",
+    "http://localhost:3000/settings/accessibility",
+    "http://localhost:3000/settings/notifications",
+    "http://localhost:3000/mock-exam/start",
+    "http://localhost:3000/mock-exam/report/fixture",
+    "http://localhost:3000/onboarding/goals"
+  ]
+}

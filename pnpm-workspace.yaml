@@ -1,5 +1,5 @@
 # pnpm workspace per ADR-0001.
-# Phase 1 has only `apps/web`. `packages/client-ts` arrives in Phase 2 (generated from OpenAPI).
+# Phase 2 enables `packages/client-ts` (generated from OpenAPI v1).
 packages:
   - "apps/web"
-  # - "packages/client-ts"  # Phase 2
+  - "packages/client-ts"

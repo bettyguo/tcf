@@ -1,0 +1,149 @@
+{
+  "app": {
+    "title": "tcf-accel",
+    "tagline": "Préparation au TCF Canada, fondée sur les preuves."
+  },
+  "nav": {
+    "today": "Aujourd'hui",
+    "insights": "Analyses",
+    "library": "Bibliothèque",
+    "settings": "Paramètres"
+  },
+  "today": {
+    "greeting": "Bonjour, {name}.",
+    "dayCounter": "Jour {day} sur {total} • {remaining} restant aujourd'hui",
+    "block": {
+      "start": "Commencer",
+      "resume": "Reprendre",
+      "minutes": "{count} min"
+    },
+    "priorityTag": "prioritaire",
+    "whyThisPlan": "Pourquoi ce plan aujourd'hui ?",
+    "noBlocks": "Aucun bloc prévu. Planifiez dans Analyses.",
+    "resumeBanner": "Une session est en cours."
+  },
+  "insights": {
+    "title": "Analyses",
+    "readinessTitle": "Préparation",
+    "minSkill": "Compétence minimale : {skill} = NCLC {value} (IC {lower}–{upper})",
+    "target": "Objectif : NCLC {value}",
+    "probability": "P(min ≥ objectif) = {p}",
+    "recommendation": "Recommandation",
+    "perSkillTrajectory": "Trajectoire par compétence",
+    "bottleneck": "Compétence goulot",
+    "floor": "plancher",
+    "states": {
+      "INSUFFICIENT_DATA": "Données insuffisantes",
+      "NOT_READY": "Pas prêt",
+      "BORDERLINE": "Limite",
+      "READY_ONE_MOCK": "Un examen blanc au vert",
+      "READY": "Prêt",
+      "REGRESSED": "Régression"
+    },
+    "recommendations": {
+      "INSUFFICIENT_DATA": "Faites un diagnostic pour situer votre niveau.",
+      "NOT_READY": "Concentrez-vous sur votre compétence goulot. Suivez le plan.",
+      "BORDERLINE": "Refaites un examen blanc dans 7 jours. Réservez l'examen seulement après 2 examens blancs verts consécutifs.",
+      "READY_ONE_MOCK": "Un examen blanc vert. Refaites-en un en mode canonique dans 7–10 jours pour confirmer.",
+      "READY": "Vous atteignez le seuil de préparation. Vous pouvez réserver votre examen.",
+      "REGRESSED": "Votre dernier examen blanc est passé sous l'objectif. Refaites-en un dans 7–14 jours avant de réserver."
+    }
+  },
+  "drill": {
+    "play": "Lire l'audio",
+    "pause": "Pause",
+    "replay": "Rejouer",
+    "submit": "Soumettre",
+    "next": "Suivant",
+    "end": "Terminer la session",
+    "rationale": "Voir l'explication",
+    "hideRationale": "Masquer l'explication",
+    "transcript": "Voir la transcription",
+    "hideTranscript": "Masquer la transcription",
+    "timeLeft": "{seconds} secondes restantes",
+    "answerHere": "Saisissez votre réponse ici",
+    "loading": "Chargement de l'élément suivant…",
+    "submitted": "Soumis.",
+    "saveDraft": "Brouillon enregistré localement."
+  },
+  "mockExam": {
+    "start": "Lancer l'examen blanc",
+    "canonical": "Canonique",
+    "training": "Entraînement",
+    "canonicalNote": "Compte pour votre préparation. Pas de transcriptions, pas d'explications, pas de saut.",
+    "trainingNote": "Mode entraînement. Transcriptions et explications disponibles après réponse. Ne compte pas pour la préparation.",
+    "abandon": "Abandonner l'examen blanc ?",
+    "abandonConfirm": "Vous perdrez cette tentative. Soumettre les réponses jusqu'ici ?",
+    "report": {
+      "headline": "Global : NCLC {min} (min entre compétences)",
+      "inflationClamped": "{n} dimension(s) ramenée(s) par le garde-fou d'inflation.",
+      "nextSteps": "Priorités suivantes",
+      "kappa": "κ du modèle : {value} (dernière calibration {date})"
+    }
+  },
+  "readiness": {
+    "checklistTitle": "Liste de réservation",
+    "checklist": {
+      "diagnostic": "Diagnostic terminé",
+      "mock1": "Examen blanc 1 au vert",
+      "mock2": "Examen blanc 2 au vert — requis",
+      "fee": "Frais d'examen payés",
+      "id": "Pièce d'identité prête"
+    }
+  },
+  "library": {
+    "grammar": "Grammaire",
+    "vocab": "Vocabulaire",
+    "writing": "Écrit",
+    "speaking": "Oral",
+    "culture": "Contexte canadien",
+    "drillThis": "S'exercer"
+  },
+  "settings": {
+    "account": "Compte",
+    "privacy": "Confidentialité",
+    "accessibility": "Accessibilité",
+    "notifications": "Notifications",
+    "apiKeys": "Clés d'API",
+    "privacyExplainer": "Vos données restent sur cet appareil tant que la synchronisation n'est pas activée.",
+    "syncedItems": "Quand la synchronisation est activée, nous synchronisons :",
+    "notSyncedItems": "Nous ne synchronisons jamais :",
+    "exportMyData": "Exporter mes données",
+    "deleteAccount": "Supprimer le compte",
+    "notificationsDefault": "Les notifications sont désactivées par défaut. La plupart des utilisateurs réussissent mieux sans rappel — votre plan vous attend à l'ouverture de l'application.",
+    "fontSize": "Taille du texte",
+    "contrast": "Contraste",
+    "font": "Police",
+    "motion": "Mouvement",
+    "captions": "Sous-titres / transcriptions par défaut",
+    "language": "Langue"
+  },
+  "onboarding": {
+    "goals": {
+      "title": "Définissez votre objectif",
+      "targetNclc": "NCLC visé",
+      "examDate": "Date d'examen (facultatif)",
+      "dailyBudget": "Budget quotidien (minutes)",
+      "l1": "Langue maternelle (facultatif)",
+      "next": "Continuer"
+    },
+    "diagnostic": {
+      "title": "Diagnostic",
+      "intro": "Un court contrôle adaptatif sur CO, CE, EE, EO afin de bien planifier. Environ 25 minutes."
+    },
+    "planPreview": {
+      "title": "Votre plan sur 12 semaines",
+      "accept": "Très bien — commencer aujourd'hui",
+      "adjust": "Ajuster"
+    }
+  },
+  "ci": {
+    "nclcLabel": "NCLC {mean} (IC {lower}–{upper})"
+  },
+  "stubBanner": "Cette traduction est incomplète. L'anglais est affiché là où il manque.",
+  "errors": {
+    "network": "Connexion perdue. Votre travail est enregistré localement et sera synchronisé à la reconnexion.",
+    "auth": "Veuillez vous reconnecter.",
+    "generic": "Une erreur s'est produite. Réessayez."
+  }
+}

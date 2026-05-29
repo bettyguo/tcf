@@ -87,6 +87,41 @@ phase1-verify: ## Phase 1 acceptance run.
 	@echo ""
 	@echo "✓ phase1-verify green"
 
+phase2-verify: ## Phase 2 acceptance run.
+	@$(MAKE) verify
+	@$(MAKE) openapi-check
+	@uv run pytest tests/contract -q
+	@uv run pytest tests/pedagogy -q
+	@echo ""
+	@echo "✓ phase2-verify green"
+
+phase2-verify-full: ## Phase 2 acceptance + live-DB integration.
+	@$(MAKE) phase2-verify
+	@uv run pytest tests/integration -q
+	@echo ""
+	@echo "✓ phase2-verify-full green (DB up/down + integration suite)"
+
+# ─── OpenAPI ───────────────────────────────────────────────────
+openapi-export: ## Re-export the frozen OpenAPI spec.
+	uv run python -m tcf_accel_api.scripts.export_openapi --output docs/api/openapi.v1.yaml
+
+openapi-check: ## Verify the on-disk spec matches the running app.
+	uv run python -m tcf_accel_api.scripts.export_openapi --check docs/api/openapi.v1.yaml
+
+# ─── Migrations ────────────────────────────────────────────────
+migrate-up: ## Apply all migrations.
+	uv run alembic -c alembic.ini upgrade head
+
+migrate-down: ## Roll back to base (drops all tables).
+	uv run alembic -c alembic.ini downgrade base
+
+# ─── Clients ───────────────────────────────────────────────────
+clients-generate: ## Regenerate TS + Python client SDKs from openapi.v1.yaml.
+	uv run python scripts/generate_clients.py
+
+golden-learner-regenerate: ## Regenerate the golden_learner trajectory.
+	uv run python scripts/generate_golden_learner.py tests/pedagogy/golden_learner.jsonl
+
 # ─── Cleanup ───────────────────────────────────────────────────
 clean: ## Remove caches + build artifacts. Keeps the venv.
 	rm -rf .pytest_cache .mypy_cache .ruff_cache .hypothesis htmlcov .coverage coverage.xml
@@ -98,4 +133,7 @@ distclean: clean ## Full clean including venv + node_modules.
 
 .PHONY: help setup setup-models dev test test-cov lint format typecheck verify \
         audit-security audit-deps audit-content audit-pedagogy release \
-        phase1-verify clean distclean
+        phase1-verify phase2-verify phase2-verify-full \
+        openapi-export openapi-check migrate-up migrate-down \
+        clients-generate golden-learner-regenerate \
+        clean distclean

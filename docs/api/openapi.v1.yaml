@@ -1,0 +1,3431 @@
+components:
+  schemas:
+    AccessibilityProfile:
+      additionalProperties: false
+      description: 'Per-learner accessibility preferences (Phase 5, ADR-029).
+
+
+        Setting `co_alternative="lexical_alt"` reroutes any CO drill the
+
+        planner emits to `co_lexical_alt`, which writes `Interaction.module
+
+        = "CE"` and does *not* contribute to the CO posterior. The UX
+
+        banner is mandatory; see `phase5_design.md §7.3`.
+
+
+        `ee_alternative="speech_to_text"` plugs STT at the EE drill''s input
+
+        layer; the rubric still scores the resulting text. `eo_alternative
+
+        = "text_input"` swaps the EO drill for a text-input variant that
+
+        emits `module="EE"` with a banner-disclaimed "does not measure
+
+        real EO" caveat.
+
+
+        `dyslexia_font` and `high_contrast` are UI-only signals consumed
+
+        by the Phase 8 frontend.'
+      properties:
+        co_alternative:
+          default: none
+          enum:
+          - none
+          - lexical_alt
+          title: Co Alternative
+          type: string
+        dyslexia_font:
+          default: false
+          title: Dyslexia Font
+          type: boolean
+        ee_alternative:
+          default: none
+          enum:
+          - none
+          - speech_to_text
+          title: Ee Alternative
+          type: string
+        eo_alternative:
+          default: none
+          enum:
+          - none
+          - text_input
+          title: Eo Alternative
+          type: string
+        high_contrast:
+          default: false
+          title: High Contrast
+          type: boolean
+      title: AccessibilityProfile
+      type: object
+    Body_submit_ee_v1_submission_ee_post:
+      properties:
+        item_id:
+          format: uuid
+          title: Item Id
+          type: string
+        text:
+          description: The candidate's written response (UTF-8).
+          title: Text
+          type: string
+      required:
+      - item_id
+      - text
+      title: Body_submit_ee_v1_submission_ee_post
+      type: object
+    Body_submit_eo_v1_submission_eo_post:
+      properties:
+        audio:
+          contentMediaType: application/octet-stream
+          description: The candidate's recording (wav/ogg/m4a).
+          title: Audio
+          type: string
+        item_id:
+          format: uuid
+          title: Item Id
+          type: string
+      required:
+      - item_id
+      - audio
+      title: Body_submit_eo_v1_submission_eo_post
+      type: object
+    CEContent:
+      additionalProperties: false
+      description: "Compréhension écrite item content.\n\nExample:\n    >>> from tcf_accel.schemas.content.co\
+        \ import MCQ, MCQOption\n    >>> CEContent(\n    ...     passage=(\n    ...\
+        \         \"Avis aux clients : nous serons fermés lundi en raison de travaux.\
+        \ \"\n    ...         \"Nous rouvrirons mardi à neuf heures. Merci de votre\
+        \ compréhension.\"\n    ...     ),\n    ...     genre='admin',\n    ...  \
+        \   word_count=21,\n    ...     questions=[MCQ(\n    ...         id='q1',\
+        \ prompt='Quand fermons-nous ?',\n    ...         options=[MCQOption(id='a',\
+        \ text='lundi'),\n    ...                  MCQOption(id='b', text='mardi')],\n\
+        \    ...         correct_option_id='a',\n    ...     )],\n    ... ).module\n\
+        \    'CE'"
+      properties:
+        genre:
+          enum:
+          - news
+          - ad
+          - letter
+          - admin
+          - academic
+          - narrative
+          title: Genre
+          type: string
+        module:
+          const: CE
+          default: CE
+          title: Module
+          type: string
+        passage:
+          minLength: 1
+          title: Passage
+          type: string
+        questions:
+          items:
+            $ref: '#/components/schemas/MCQ'
+          minItems: 1
+          title: Questions
+          type: array
+        word_count:
+          maximum: 2000.0
+          minimum: 20.0
+          title: Word Count
+          type: integer
+      required:
+      - passage
+      - genre
+      - word_count
+      - questions
+      title: CEContent
+      type: object
+    COContent:
+      additionalProperties: false
+      description: "Compréhension orale item content.\n\nExample:\n    >>> COContent(\n\
+        \    ...     transcript=\"Bonjour, c'est Annick.\",\n    ...     duration_s=8.5,\n\
+        \    ...     speakers=[Speaker(label='A', accent='fr-FR')],\n    ...     accent='fr-FR',\n\
+        \    ...     register='standard',\n    ...     questions=[MCQ(\n    ...  \
+        \       id='q1', prompt='Qui parle ?',\n    ...         options=[MCQOption(id='a',\
+        \ text='Annick'),\n    ...                  MCQOption(id='b', text='Pierre')],\n\
+        \    ...         correct_option_id='a',\n    ...     )],\n    ... ).module\n\
+        \    'CO'"
+      properties:
+        accent:
+          enum:
+          - fr-FR
+          - fr-CA
+          - fr-BE
+          - fr-CH
+          - fr-AF
+          - mixed
+          title: Accent
+          type: string
+        audio_local_path:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filesystem path for operator-cached audio (privacy_mode=local_only).
+          title: Audio Local Path
+        audio_url:
+          anyOf:
+          - format: uri
+            minLength: 1
+            type: string
+          - type: 'null'
+          title: Audio Url
+        duration_s:
+          maximum: 600.0
+          minimum: 1.0
+          title: Duration S
+          type: number
+        module:
+          const: CO
+          default: CO
+          title: Module
+          type: string
+        questions:
+          items:
+            $ref: '#/components/schemas/MCQ'
+          minItems: 1
+          title: Questions
+          type: array
+        register:
+          enum:
+          - soutenu
+          - standard
+          - familier
+          title: Register
+          type: string
+        speakers:
+          items:
+            $ref: '#/components/schemas/Speaker'
+          minItems: 1
+          title: Speakers
+          type: array
+        transcript:
+          minLength: 1
+          title: Transcript
+          type: string
+      required:
+      - transcript
+      - duration_s
+      - speakers
+      - accent
+      - register
+      - questions
+      title: COContent
+      type: object
+    DailyBlock:
+      additionalProperties: false
+      description: All blocks scheduled for a single calendar date.
+      properties:
+        blocks:
+          items:
+            $ref: '#/components/schemas/PlanBlock'
+          title: Blocks
+          type: array
+        date:
+          format: date
+          title: Date
+          type: string
+        total_minutes:
+          description: Sum of `block.minutes`; cached for the UI.
+          minimum: 0.0
+          title: Total Minutes
+          type: integer
+      required:
+      - date
+      - total_minutes
+      title: DailyBlock
+      type: object
+    DataDeleteResponse:
+      additionalProperties: false
+      description: Returned by `DELETE /v1/data` after a successful soft-delete.
+      properties:
+        deleted:
+          title: Deleted
+          type: boolean
+        scheduled_purge_at:
+          format: date-time
+          title: Scheduled Purge At
+          type: string
+      required:
+      - deleted
+      - scheduled_purge_at
+      title: DataDeleteResponse
+      type: object
+    DiagnosticAnswer:
+      additionalProperties: false
+      description: The candidate's response to a single diagnostic item.
+      properties:
+        item_id:
+          format: uuid
+          title: Item Id
+          type: string
+        response:
+          additionalProperties: true
+          description: MCQ option id, free text, audio URI, etc. Shape depends on
+            the item's module.
+          title: Response
+          type: object
+        rt_ms:
+          description: Response time in milliseconds.
+          minimum: 0.0
+          title: Rt Ms
+          type: integer
+      required:
+      - item_id
+      - response
+      - rt_ms
+      title: DiagnosticAnswer
+      type: object
+    DiagnosticReport:
+      additionalProperties: false
+      description: Final diagnostic report — returned by `POST /v1/diagnostic/{id}/finish`.
+      properties:
+        bottleneck_skill:
+          description: The lowest NCLC skill; the planner will weight this skill first.
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Bottleneck Skill
+          type: string
+        completed_at:
+          format: date-time
+          title: Completed At
+          type: string
+        confidence_summary:
+          description: 'high: all four skills `confident=True`. partial: some skills
+            confident. exploratory: no skill confident — user should do another session
+            before booking the exam.'
+          enum:
+          - high
+          - partial
+          - exploratory
+          title: Confidence Summary
+          type: string
+        per_skill:
+          items:
+            $ref: '#/components/schemas/SkillLevel'
+          minItems: 1
+          title: Per Skill
+          type: array
+        plan_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Id of the StudyPlan generated from this diagnostic, if any.
+          title: Plan Id
+        session_id:
+          format: uuid
+          title: Session Id
+          type: string
+        user_id:
+          format: uuid
+          title: User Id
+          type: string
+      required:
+      - session_id
+      - user_id
+      - completed_at
+      - per_skill
+      - bottleneck_skill
+      - confidence_summary
+      title: DiagnosticReport
+      type: object
+    DiagnosticState:
+      additionalProperties: false
+      description: Mid-flight state of the adaptive diagnostic session.
+      properties:
+        completed_modules:
+          items:
+            enum:
+            - CO
+            - CE
+            - EE
+            - EO
+            type: string
+          title: Completed Modules
+          type: array
+        current_module:
+          anyOf:
+          - enum:
+            - CO
+            - CE
+            - EE
+            - EO
+            type: string
+          - type: 'null'
+          description: The module the next item will be drawn from; None when finished.
+          title: Current Module
+        estimates_in_progress:
+          additionalProperties:
+            type: number
+          description: Running posterior mean per skill (continuous NCLC). UI shows
+            these only with a confidence indicator.
+          propertyNames:
+            enum:
+            - CO
+            - CE
+            - EE
+            - EO
+          title: Estimates In Progress
+          type: object
+        finished_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Finished At
+        id:
+          format: uuid
+          title: Id
+          type: string
+        items_seen:
+          minimum: 0.0
+          title: Items Seen
+          type: integer
+        next_item_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: Pre-fetched next item; the client renders this when the user
+            advances.
+          title: Next Item Id
+        started_at:
+          format: date-time
+          title: Started At
+          type: string
+        user_id:
+          format: uuid
+          title: User Id
+          type: string
+      required:
+      - id
+      - user_id
+      - started_at
+      - items_seen
+      title: DiagnosticState
+      type: object
+    EEContent:
+      additionalProperties: false
+      description: "Expression écrite item content.\n\nExample:\n    >>> EEContent(\n\
+        \    ...     task_number=2,\n    ...     prompt=\"Vous écrivez à votre voisin\
+        \ pour vous plaindre du bruit.\",\n    ...     target_word_count_range=(120,\
+        \ 150),\n    ...     required_canadian_context=True,\n    ...     rubric_version='ee.v1',\n\
+        \    ... ).module\n    'EE'"
+      properties:
+        module:
+          const: EE
+          default: EE
+          title: Module
+          type: string
+        prompt:
+          minLength: 1
+          title: Prompt
+          type: string
+        required_canadian_context:
+          description: True for Task 2 and Task 3 per TCF Canada spec.
+          title: Required Canadian Context
+          type: boolean
+        rubric_version:
+          description: Pinned per release; the Phase 7 rubric scorer uses this to
+            select the correct prompt template.
+          minLength: 1
+          title: Rubric Version
+          type: string
+        target_word_count_range:
+          description: (min, max) word count expected for a complete response.
+          maxItems: 2
+          minItems: 2
+          prefixItems:
+          - type: integer
+          - type: integer
+          title: Target Word Count Range
+          type: array
+        task_number:
+          enum:
+          - 1
+          - 2
+          - 3
+          title: Task Number
+          type: integer
+      required:
+      - task_number
+      - prompt
+      - target_word_count_range
+      - required_canadian_context
+      - rubric_version
+      title: EEContent
+      type: object
+    EOContent:
+      additionalProperties: false
+      description: "Expression orale item content.\n\nExample:\n    >>> EOContent(\n\
+        \    ...     task_number=1,\n    ...     examiner_prompts=['Présentez-vous.',\
+        \ \"Parlez de votre travail.\"],\n    ...     candidate_prep_time_s=0,\n \
+        \   ...     target_duration_s=120,\n    ...     rubric_version='eo.v1',\n\
+        \    ... ).module\n    'EO'"
+      properties:
+        candidate_prep_time_s:
+          description: Allowed preparation time before the candidate speaks; usually
+            0 for Task 1.
+          maximum: 600.0
+          minimum: 0.0
+          title: Candidate Prep Time S
+          type: integer
+        examiner_prompts:
+          items:
+            type: string
+          minItems: 1
+          title: Examiner Prompts
+          type: array
+        module:
+          const: EO
+          default: EO
+          title: Module
+          type: string
+        rubric_version:
+          description: Pinned per release; the Phase 7 rubric scorer uses this to
+            select the correct prompt template.
+          minLength: 1
+          title: Rubric Version
+          type: string
+        target_duration_s:
+          description: Target speaking duration; the rubric penalizes large deviations.
+          maximum: 600.0
+          minimum: 30.0
+          title: Target Duration S
+          type: integer
+        task_number:
+          enum:
+          - 1
+          - 2
+          - 3
+          title: Task Number
+          type: integer
+      required:
+      - task_number
+      - examiner_prompts
+      - candidate_prep_time_s
+      - target_duration_s
+      - rubric_version
+      title: EOContent
+      type: object
+    ErrorAnnotation:
+      additionalProperties: false
+      description: A spanned error in a learner's writing or speaking transcript.
+      properties:
+        confidence:
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence
+          type: number
+        error_type:
+          enum:
+          - spelling
+          - agreement
+          - tense
+          - preposition
+          - article
+          - syntax
+          - register
+          - vocabulary
+          - cohesion
+          - other
+          title: Error Type
+          type: string
+        span_end:
+          minimum: 0.0
+          title: Span End
+          type: integer
+        span_start:
+          minimum: 0.0
+          title: Span Start
+          type: integer
+        suggestion:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Suggestion
+      required:
+      - span_start
+      - span_end
+      - error_type
+      - confidence
+      title: ErrorAnnotation
+      type: object
+    ErrorEnvelope:
+      additionalProperties: false
+      description: JSON shape returned by every non-2xx response.
+      properties:
+        code:
+          description: 'Stable error code (ADR-014). Format: E_<DOMAIN>_<NNN>; DOMAIN
+            may contain underscores (e.g. E_NOT_IMPLEMENTED_001).'
+          pattern: ^E_[A-Z][A-Z_]*_\d{3}$
+          title: Code
+          type: string
+        context:
+          additionalProperties: true
+          description: Structured context for the error. Keys are stable per code
+            (ADR-014 point 6).
+          title: Context
+          type: object
+        http_status:
+          maximum: 599.0
+          minimum: 400.0
+          title: Http Status
+          type: integer
+        message:
+          description: Default-locale rendered message (EN).
+          minLength: 1
+          title: Message
+          type: string
+        message_localized:
+          additionalProperties:
+            type: string
+          description: Locale → rendered message. Keys are BCP-47 codes (e.g. 'en',
+            'fr').
+          title: Message Localized
+          type: object
+        phase:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Set only on 501 E_NOT_IMPLEMENTED_001 to indicate the owning
+            build phase.
+          title: Phase
+      required:
+      - code
+      - http_status
+      - message
+      title: ErrorEnvelope
+      type: object
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: Detail
+          type: array
+      title: HTTPValidationError
+      type: object
+    HealthResponse:
+      description: Healthz response payload.
+      properties:
+        phase:
+          description: Current build-phase number; sanity-checked in tests.
+          title: Phase
+          type: integer
+        schema_version:
+          description: '`tcf_accel.schemas.version.SCHEMA_VERSION`.'
+          title: Schema Version
+          type: string
+        status:
+          const: ok
+          default: ok
+          title: Status
+          type: string
+      required:
+      - phase
+      - schema_version
+      title: HealthResponse
+      type: object
+    Item:
+      additionalProperties: false
+      description: 'A content-bank item across CO / CE / EE / EO modules.
+
+
+        Phase 1''s frozen contract. Phase 2 narrowed the `content` field''s
+
+        type from a permissive placeholder to the discriminated union above.
+
+        The wire shape is unchanged for any Phase 1-conformant payload.
+
+        Further changes require an ADR + a `SCHEMA_VERSION` bump + a
+
+        `CHANGELOG.md` entry.'
+      properties:
+        cefr_level:
+          enum:
+          - A1
+          - A2
+          - B1
+          - B2
+          - C1
+          - C2
+          title: Cefr Level
+          type: string
+        content:
+          discriminator:
+            mapping:
+              CE: '#/components/schemas/CEContent'
+              CO: '#/components/schemas/COContent'
+              EE: '#/components/schemas/EEContent'
+              EO: '#/components/schemas/EOContent'
+            propertyName: module
+          oneOf:
+          - $ref: '#/components/schemas/COContent'
+          - $ref: '#/components/schemas/CEContent'
+          - $ref: '#/components/schemas/EEContent'
+          - $ref: '#/components/schemas/EOContent'
+          title: Content
+        difficulty_irt:
+          anyOf:
+          - type: number
+          - type: 'null'
+          description: IRT 2PL `b` parameter; set by the nightly calibration job (Phase
+            4 + ADR-0013).
+          title: Difficulty Irt
+        discrimination_irt:
+          anyOf:
+          - type: number
+          - type: 'null'
+          description: IRT 2PL `a` parameter; set by the nightly calibration job (Phase
+            4 + ADR-0013).
+          title: Discrimination Irt
+        id:
+          format: uuid
+          title: Id
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ItemMetadata'
+        module:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Module
+          type: string
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        quality_flags:
+          items:
+            $ref: '#/components/schemas/QualityFlag'
+          title: Quality Flags
+          type: array
+        retired:
+          default: false
+          title: Retired
+          type: boolean
+        schema_version:
+          default: 0.4.0
+          title: Schema Version
+          type: string
+        synthetic:
+          default: false
+          title: Synthetic
+          type: boolean
+      required:
+      - id
+      - module
+      - cefr_level
+      - content
+      - provenance
+      title: Item
+      type: object
+    ItemMetadata:
+      additionalProperties: true
+      description: 'Open-ended metadata bag for retrieval, clustering, and analytics.
+
+
+        The model remains `extra="allow"`, so any field not listed here is
+
+        accepted and round-trips through the JSONB column. The fields
+
+        enumerated below are *documented* surfaces — populated by the
+
+        Phase 3 content pipeline and consumed by Phase 4+. Adding a new
+
+        optional field here is a non-breaking change.'
+      properties:
+        calibration_anchors:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          description: EE/EO-only model-response anchors keyed by 'nclc_7', 'nclc_9',
+            'nclc_11'; Phase 7 calibrates the rubric scorer against these.
+          title: Calibration Anchors
+        canadian_context:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: True iff the item's content is Canadian-flavored (EE/EO Tasks
+            2&3 require True).
+          title: Canadian Context
+        cefr_confidence:
+          anyOf:
+          - maximum: 1.0
+            minimum: 0.0
+            type: number
+          - type: 'null'
+          description: Max-softmax post-calibration probability from the CEFR classifier.
+          title: Cefr Confidence
+        cefr_distribution:
+          anyOf:
+          - additionalProperties:
+              type: number
+            type: object
+          - type: 'null'
+          description: Full A1..C2 softmax distribution at the time the item was classified.
+          title: Cefr Distribution
+        co_acoustic:
+          anyOf:
+          - additionalProperties:
+              type: number
+            type: object
+          - type: 'null'
+          description: 'CO-only acoustic features: keys ''speech_rate_wpm'', ''lexical_density'',
+            ''n_speakers_diarized'', ''noisiness_proxy''.'
+          title: Co Acoustic
+        created_by:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Created By
+        seed:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Deterministic seed used during synthesis; enables reproducibility.
+          title: Seed
+        synthesis_trace_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Local-only pointer to data/cache/quality/<item_id>.json with
+            the full synthesis trace.
+          title: Synthesis Trace Uri
+        tags:
+          items:
+            type: string
+          title: Tags
+          type: array
+        topic:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Topic
+        topic_cluster_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Topic Cluster Id
+      title: ItemMetadata
+      type: object
+    LoginRequest:
+      additionalProperties: false
+      properties:
+        email:
+          format: email
+          title: Email
+          type: string
+        password:
+          maxLength: 200
+          minLength: 1
+          title: Password
+          type: string
+      required:
+      - email
+      - password
+      title: LoginRequest
+      type: object
+    MCQ:
+      additionalProperties: false
+      description: 'A multiple-choice question.
+
+
+        Used by both CO and CE items. Invariant: `correct_option_id` must
+
+        appear in `options`.'
+      properties:
+        correct_option_id:
+          title: Correct Option Id
+          type: string
+        explanation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Explanation
+        id:
+          description: Stable question id within the item.
+          minLength: 1
+          title: Id
+          type: string
+        options:
+          items:
+            $ref: '#/components/schemas/MCQOption'
+          minItems: 2
+          title: Options
+          type: array
+        prompt:
+          minLength: 1
+          title: Prompt
+          type: string
+      required:
+      - id
+      - prompt
+      - options
+      - correct_option_id
+      title: MCQ
+      type: object
+    MCQOption:
+      additionalProperties: false
+      description: One option in a multiple-choice question.
+      properties:
+        id:
+          description: Short stable slug, e.g. 'a', 'b', 'c'.
+          maxLength: 8
+          minLength: 1
+          title: Id
+          type: string
+        text:
+          minLength: 1
+          title: Text
+          type: string
+      required:
+      - id
+      - text
+      title: MCQOption
+      type: object
+    MeProfile:
+      additionalProperties: false
+      description: The authenticated user's full profile.
+      properties:
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        daily_minutes_budget:
+          maximum: 480.0
+          minimum: 15.0
+          title: Daily Minutes Budget
+          type: integer
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+        email:
+          format: email
+          title: Email
+          type: string
+        id:
+          format: uuid
+          title: Id
+          type: string
+        locale:
+          enum:
+          - en
+          - fr
+          - es
+          - ar
+          - zh
+          title: Locale
+          type: string
+        privacy_mode:
+          description: Default 'local_only' per ADR-0017; flipping to 'cloud_optin'
+            requires explicit opt-in.
+          enum:
+          - local_only
+          - cloud_optin
+          title: Privacy Mode
+          type: string
+        target_exam_date:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          title: Target Exam Date
+        target_nclc:
+          maximum: 12.0
+          minimum: 4.0
+          title: Target Nclc
+          type: integer
+      required:
+      - id
+      - email
+      - display_name
+      - target_nclc
+      - target_exam_date
+      - daily_minutes_budget
+      - locale
+      - privacy_mode
+      - created_at
+      title: MeProfile
+      type: object
+    MockExamAnswer:
+      additionalProperties: false
+      description: Body of `POST /v1/mock-exam/{id}/answer` (Phase 6 additive).
+      properties:
+        item_id:
+          format: uuid
+          title: Item Id
+          type: string
+        kind:
+          enum:
+          - mcq
+          - rubric
+          title: Kind
+          type: string
+        module:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Module
+          type: string
+        rt_ms:
+          default: 0
+          minimum: 0.0
+          title: Rt Ms
+          type: integer
+        rubric_total_20:
+          anyOf:
+          - maximum: 20.0
+            minimum: 0.0
+            type: number
+          - type: 'null'
+          description: Required when kind=rubric.
+          title: Rubric Total 20
+        selected_option_id:
+          anyOf:
+          - maxLength: 8
+            type: string
+          - type: 'null'
+          description: Required when kind=mcq.
+          title: Selected Option Id
+        task_number:
+          anyOf:
+          - maximum: 3.0
+            minimum: 1.0
+            type: integer
+          - type: 'null'
+          description: Required when kind=rubric (EE/EO 1, 2, 3).
+          title: Task Number
+      required:
+      - item_id
+      - module
+      - kind
+      title: MockExamAnswer
+      type: object
+    MockExamCoPlay:
+      additionalProperties: false
+      description: Body of `POST /v1/mock-exam/{id}/co-play` (Phase 6 additive).
+      properties:
+        item_id:
+          format: uuid
+          title: Item Id
+          type: string
+      required:
+      - item_id
+      title: MockExamCoPlay
+      type: object
+    MockExamReport:
+      additionalProperties: false
+      description: Returned by `GET /v1/mock-exam/{id}/report`.
+      properties:
+        bottleneck_skill:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Bottleneck Skill
+          type: string
+        completed_at:
+          format: date-time
+          title: Completed At
+          type: string
+        id:
+          format: uuid
+          title: Id
+          type: string
+        item_log_uri:
+          description: URI to the full per-item log (JSONL); fetched separately to
+            keep this response small.
+          title: Item Log Uri
+          type: string
+        overall_confident:
+          title: Overall Confident
+          type: boolean
+        overall_nclc:
+          description: Composite NCLC (lowest skill per TCF Canada equivalence).
+          maximum: 12.0
+          minimum: 1.0
+          title: Overall Nclc
+          type: integer
+        per_module:
+          items:
+            $ref: '#/components/schemas/PerModuleScore'
+          minItems: 1
+          title: Per Module
+          type: array
+        user_id:
+          format: uuid
+          title: User Id
+          type: string
+      required:
+      - id
+      - user_id
+      - completed_at
+      - per_module
+      - overall_nclc
+      - overall_confident
+      - bottleneck_skill
+      - item_log_uri
+      title: MockExamReport
+      type: object
+    MockExamStart:
+      additionalProperties: false
+      description: Body of `POST /v1/mock-exam/start` (Phase 6 additive).
+      properties:
+        force:
+          default: false
+          description: Override the cadence cap; logged at WARN for audit.
+          title: Force
+          type: boolean
+        mode:
+          default: canonical
+          enum:
+          - canonical
+          - training
+          title: Mode
+          type: string
+      title: MockExamStart
+      type: object
+    MockExamState:
+      additionalProperties: false
+      description: The mock-exam's lifecycle envelope.
+      properties:
+        current_item_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Current Item Id
+        current_module:
+          anyOf:
+          - enum:
+            - CO
+            - CE
+            - EE
+            - EO
+            type: string
+          - type: 'null'
+          title: Current Module
+        finished_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Finished At
+        id:
+          format: uuid
+          title: Id
+          type: string
+        mode:
+          description: 'canonical: locks shape to FEI spec; training: relaxed for
+            diagnostic practice.'
+          enum:
+          - canonical
+          - training
+          title: Mode
+          type: string
+        seconds_remaining_in_module:
+          anyOf:
+          - minimum: 0.0
+            type: integer
+          - type: 'null'
+          description: Soft countdown the UI uses; the server is the source of truth
+            for actual locking.
+          title: Seconds Remaining In Module
+        started_at:
+          format: date-time
+          title: Started At
+          type: string
+        status:
+          enum:
+          - in_progress
+          - submitted
+          - scored
+          title: Status
+          type: string
+        user_id:
+          format: uuid
+          title: User Id
+          type: string
+      required:
+      - id
+      - user_id
+      - mode
+      - status
+      - started_at
+      title: MockExamState
+      type: object
+    MockExamTabBlur:
+      additionalProperties: false
+      description: Body of `POST /v1/mock-exam/{id}/tab-blur` (Phase 6 additive).
+      properties:
+        duration_ms:
+          minimum: 0.0
+          title: Duration Ms
+          type: integer
+      required:
+      - duration_ms
+      title: MockExamTabBlur
+      type: object
+    NCLCEstimate:
+      additionalProperties: false
+      description: 'Per-skill NCLC posterior — the public-facing API shape.
+
+
+        Phase 4''s internal `SkillPosterior` carries additional state
+
+        (posterior_variance, difficulty-band spread); this `NCLCEstimate`
+
+        is the projection the API and the generated clients see.'
+      properties:
+        ci_high:
+          maximum: 12.0
+          minimum: 1.0
+          title: Ci High
+          type: integer
+        ci_low:
+          maximum: 12.0
+          minimum: 1.0
+          title: Ci Low
+          type: integer
+        confident:
+          title: Confident
+          type: boolean
+        n_observations:
+          minimum: 0.0
+          title: N Observations
+          type: integer
+        posterior_mean:
+          maximum: 12.0
+          minimum: 1.0
+          title: Posterior Mean
+          type: number
+        skill:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Skill
+          type: string
+      required:
+      - skill
+      - posterior_mean
+      - ci_low
+      - ci_high
+      - confident
+      - n_observations
+      title: NCLCEstimate
+      type: object
+    NCLCTrajectory:
+      additionalProperties: false
+      description: Time series of estimates per skill, with forecast extension.
+      properties:
+        horizon_end:
+          format: date
+          title: Horizon End
+          type: string
+        points:
+          items:
+            $ref: '#/components/schemas/NCLCTrajectoryPoint'
+          title: Points
+          type: array
+      required:
+      - horizon_end
+      title: NCLCTrajectory
+      type: object
+    NCLCTrajectoryPoint:
+      additionalProperties: false
+      description: One point on the historical + forecast trajectory.
+      properties:
+        at:
+          format: date-time
+          title: At
+          type: string
+        ci_high:
+          maximum: 12.0
+          minimum: 1.0
+          title: Ci High
+          type: integer
+        ci_low:
+          maximum: 12.0
+          minimum: 1.0
+          title: Ci Low
+          type: integer
+        is_forecast:
+          description: True for points that come from the planner forecast (after
+            now()); False for observed history.
+          title: Is Forecast
+          type: boolean
+        posterior_mean:
+          maximum: 12.0
+          minimum: 1.0
+          title: Posterior Mean
+          type: number
+        skill:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Skill
+          type: string
+      required:
+      - at
+      - skill
+      - posterior_mean
+      - ci_low
+      - ci_high
+      - is_forecast
+      title: NCLCTrajectoryPoint
+      type: object
+    PerModuleScore:
+      additionalProperties: false
+      description: Raw + scaled score for one module.
+      properties:
+        estimate:
+          $ref: '#/components/schemas/NCLCEstimate'
+        max_score:
+          minimum: 0.0
+          title: Max Score
+          type: number
+        module:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Module
+          type: string
+        raw_score:
+          minimum: 0.0
+          title: Raw Score
+          type: number
+      required:
+      - module
+      - raw_score
+      - max_score
+      - estimate
+      title: PerModuleScore
+      type: object
+    PlanBlock:
+      additionalProperties: false
+      description: One activity in a daily block — typically 5–30 minutes.
+      properties:
+        drill_type:
+          enum:
+          - flashcard
+          - cloze
+          - mcq
+          - shadowing
+          - writing_short
+          - writing_long
+          - speaking_role
+          - speaking_mono
+          - mock_section
+          - co_dictation
+          - co_accent
+          - co_gapfill
+          - co_lexical_alt
+          - ce_skim_scan
+          - ce_vocab_context
+          - ce_register_id
+          - ce_summary
+          - ee_rewrite
+          - ee_connector
+          - ee_error_correction
+          - ee_register_adjust
+          - eo_picture
+          - eo_spontaneous
+          - eo_roleplay
+          - eo_repair
+          - eo_text_alt
+          title: Drill Type
+          type: string
+        minutes:
+          maximum: 240.0
+          minimum: 1.0
+          title: Minutes
+          type: integer
+        rationale:
+          description: One-line explanation of why this block was scheduled (planner
+            output).
+          minLength: 1
+          title: Rationale
+          type: string
+        skill:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Skill
+          type: string
+      required:
+      - skill
+      - minutes
+      - drill_type
+      - rationale
+      title: PlanBlock
+      type: object
+    Provenance:
+      additionalProperties: false
+      description: "Chain-of-custody for an item.\n\nEvery item carries one of these.\
+        \ The fields are deliberately verbose so\n`audit-content` (Phase 3+) can reconstruct\
+        \ any item's origin without\nconsulting external systems.\n\nExample:\n  \
+        \  >>> from datetime import UTC, datetime\n    >>> Provenance(\n    ...  \
+        \   source=\"common_voice_fr_v17\",\n    ...     source_id=\"19284732\",\n\
+        \    ...     license=\"CC0-1.0\",\n    ...     ingested_at=datetime(2026,\
+        \ 6, 1, tzinfo=UTC),\n    ...     review_status=\"auto_passed\",\n    ...\
+        \ ).license\n    'CC0-1.0'\n\nComplexity: O(1) construction."
+      properties:
+        fetcher_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Fetcher Version
+        ingested_at:
+          description: UTC timestamp of ingestion.
+          format: date-time
+          title: Ingested At
+          type: string
+        license:
+          description: SPDX-style identifier (e.g. 'CC0-1.0', 'CC-BY-SA-4.0') or 'proprietary'
+            for unredistributable items.
+          title: License
+          type: string
+        llm_model:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Llm Model
+        llm_prompt_hash:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: sha256 of the rendered LLM prompt; used for reproducibility
+            audits.
+          title: Llm Prompt Hash
+        review_notes:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Review Notes
+        review_status:
+          default: auto_passed
+          enum:
+          - auto_passed
+          - human_approved
+          - human_modified
+          - rejected
+          - pending_review
+          title: Review Status
+          type: string
+        source:
+          description: Logical source identifier, e.g. 'common_voice_fr_v17'.
+          title: Source
+          type: string
+        source_id:
+          description: Stable id within the source.
+          title: Source Id
+          type: string
+        synthesizer_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Synthesizer Version
+      required:
+      - source
+      - source_id
+      - license
+      - ingested_at
+      title: Provenance
+      type: object
+    QualityFlag:
+      description: 'Pipeline-stage flags attached to an item.
+
+
+        These are *informational*; pipeline stages may reject on certain flags,
+
+        but the flag itself is data, not a decision.'
+      enum:
+      - synthetic
+      - low_confidence_cefr
+      - potential_duplicate
+      - high_adversarial
+      - pii_suspected
+      - needs_human_review
+      - license_ambiguous
+      - acoustic_low_quality
+      - register_mismatch
+      - cefr_human_overridden
+      - topic_over_capped
+      title: QualityFlag
+      type: string
+    Readiness:
+      additionalProperties: false
+      description: 'The traffic-light ''are you ready to book the exam?'' answer.
+
+
+        Per R-004 + Phase 9 launch gate: 🟢 requires two consecutive
+
+        canonical-mock greens *and* `confident=True` on all four skills.
+
+        The Phase 8 UI surfaces this as the headline.'
+      properties:
+        canonical_mock_streak_green:
+          description: Consecutive canonical-mock greens; ≥ 2 is one prerequisite
+            for overall green.
+          minimum: 0.0
+          title: Canonical Mock Streak Green
+          type: integer
+        last_canonical_mock_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Last Canonical Mock At
+        light:
+          enum:
+          - red
+          - yellow
+          - green
+          title: Light
+          type: string
+        per_skill:
+          items:
+            $ref: '#/components/schemas/NCLCEstimate'
+          minItems: 1
+          title: Per Skill
+          type: array
+        reason:
+          description: One-paragraph explanation of why the light is its color.
+          minLength: 1
+          title: Reason
+          type: string
+      required:
+      - light
+      - per_skill
+      - reason
+      - canonical_mock_streak_green
+      title: Readiness
+      type: object
+    RefreshRequest:
+      additionalProperties: false
+      properties:
+        refresh_token:
+          minLength: 1
+          title: Refresh Token
+          type: string
+      required:
+      - refresh_token
+      title: RefreshRequest
+      type: object
+    SessionAnswer:
+      additionalProperties: false
+      description: Body of `POST /v1/session/{id}/answer`.
+      properties:
+        item_id:
+          format: uuid
+          title: Item Id
+          type: string
+        rating:
+          anyOf:
+          - maximum: 4.0
+            minimum: 1.0
+            type: integer
+          - type: 'null'
+          description: FSRS self-rating (1=again, 2=hard, 3=good, 4=easy). Optional;
+            the scheduler can infer from correctness for MCQs.
+          title: Rating
+        response:
+          additionalProperties: true
+          description: Shape depends on the item's module (MCQ option id, text, audio
+            URI, etc).
+          title: Response
+          type: object
+        rt_ms:
+          minimum: 0.0
+          title: Rt Ms
+          type: integer
+      required:
+      - item_id
+      - response
+      - rt_ms
+      title: SessionAnswer
+      type: object
+    SessionItem:
+      additionalProperties: false
+      description: The next item to render, with any session-scoped hints.
+      properties:
+        expected_rt_ms:
+          anyOf:
+          - minimum: 0.0
+            type: integer
+          - type: 'null'
+          description: Planner's expected response time; used by the UI for a soft
+            timer.
+          title: Expected Rt Ms
+        is_review:
+          description: True if the item is due for review (FSRS); False for new items.
+          title: Is Review
+          type: boolean
+        item:
+          $ref: '#/components/schemas/Item'
+        session_id:
+          format: uuid
+          title: Session Id
+          type: string
+      required:
+      - session_id
+      - item
+      - is_review
+      title: SessionItem
+      type: object
+    SessionStart:
+      additionalProperties: false
+      description: Body of `POST /v1/session/start`.
+      properties:
+        drill_type:
+          enum:
+          - flashcard
+          - cloze
+          - mcq
+          - shadowing
+          - writing_short
+          - writing_long
+          - speaking_role
+          - speaking_mono
+          - mock_section
+          - co_dictation
+          - co_accent
+          - co_gapfill
+          - co_lexical_alt
+          - ce_skim_scan
+          - ce_vocab_context
+          - ce_register_id
+          - ce_summary
+          - ee_rewrite
+          - ee_connector
+          - ee_error_correction
+          - ee_register_adjust
+          - eo_picture
+          - eo_spontaneous
+          - eo_roleplay
+          - eo_repair
+          - eo_text_alt
+          title: Drill Type
+          type: string
+        module:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Module
+          type: string
+        target_minutes:
+          description: Soft target; the planner may exceed for due reviews.
+          maximum: 240.0
+          minimum: 1.0
+          title: Target Minutes
+          type: integer
+      required:
+      - module
+      - drill_type
+      - target_minutes
+      title: SessionStart
+      type: object
+    SessionState:
+      additionalProperties: false
+      description: The session lifecycle envelope.
+      properties:
+        drill_type:
+          enum:
+          - flashcard
+          - cloze
+          - mcq
+          - shadowing
+          - writing_short
+          - writing_long
+          - speaking_role
+          - speaking_mono
+          - mock_section
+          - co_dictation
+          - co_accent
+          - co_gapfill
+          - co_lexical_alt
+          - ce_skim_scan
+          - ce_vocab_context
+          - ce_register_id
+          - ce_summary
+          - ee_rewrite
+          - ee_connector
+          - ee_error_correction
+          - ee_register_adjust
+          - eo_picture
+          - eo_spontaneous
+          - eo_roleplay
+          - eo_repair
+          - eo_text_alt
+          title: Drill Type
+          type: string
+        finished_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Finished At
+        id:
+          format: uuid
+          title: Id
+          type: string
+        items_correct:
+          minimum: 0.0
+          title: Items Correct
+          type: integer
+        items_seen:
+          minimum: 0.0
+          title: Items Seen
+          type: integer
+        module:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Module
+          type: string
+        started_at:
+          format: date-time
+          title: Started At
+          type: string
+        target_minutes:
+          maximum: 240.0
+          minimum: 1.0
+          title: Target Minutes
+          type: integer
+        user_id:
+          format: uuid
+          title: User Id
+          type: string
+      required:
+      - id
+      - user_id
+      - module
+      - drill_type
+      - target_minutes
+      - started_at
+      - items_seen
+      - items_correct
+      title: SessionState
+      type: object
+    SessionSummary:
+      additionalProperties: false
+      description: Returned by `POST /v1/session/{id}/finish`.
+      properties:
+        accuracy:
+          maximum: 1.0
+          minimum: 0.0
+          title: Accuracy
+          type: number
+        cards_due_next_24h:
+          minimum: 0.0
+          title: Cards Due Next 24H
+          type: integer
+        deltas:
+          items:
+            $ref: '#/components/schemas/SkillDelta'
+          title: Deltas
+          type: array
+        finished_at:
+          format: date-time
+          title: Finished At
+          type: string
+        items_correct:
+          minimum: 0.0
+          title: Items Correct
+          type: integer
+        items_seen:
+          minimum: 0.0
+          title: Items Seen
+          type: integer
+        plan_regenerated:
+          description: True if the posterior shift crossed the threshold (ADR-0012)
+            and the plan was rebuilt.
+          title: Plan Regenerated
+          type: boolean
+        session_id:
+          format: uuid
+          title: Session Id
+          type: string
+      required:
+      - session_id
+      - finished_at
+      - items_seen
+      - items_correct
+      - accuracy
+      - cards_due_next_24h
+      - plan_regenerated
+      title: SessionSummary
+      type: object
+    SignupRequest:
+      additionalProperties: false
+      properties:
+        display_name:
+          anyOf:
+          - maxLength: 80
+            type: string
+          - type: 'null'
+          title: Display Name
+        email:
+          format: email
+          title: Email
+          type: string
+        locale:
+          default: en
+          pattern: ^(en|fr|es|ar|zh)$
+          title: Locale
+          type: string
+        password:
+          maxLength: 200
+          minLength: 12
+          title: Password
+          type: string
+      required:
+      - email
+      - password
+      title: SignupRequest
+      type: object
+    SkillDelta:
+      additionalProperties: false
+      description: Posterior shift in a single skill across the session.
+      properties:
+        after:
+          maximum: 12.0
+          minimum: 1.0
+          title: After
+          type: number
+        before:
+          maximum: 12.0
+          minimum: 1.0
+          title: Before
+          type: number
+        delta:
+          description: Signed shift; positive = improvement.
+          title: Delta
+          type: number
+        skill:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Skill
+          type: string
+      required:
+      - skill
+      - before
+      - after
+      - delta
+      title: SkillDelta
+      type: object
+    SkillLevel:
+      additionalProperties: false
+      description: One skill's diagnostic result.
+      properties:
+        cefr_band:
+          description: Best-fit CEFR level for the posterior mean (advisory; NCLC
+            is canonical).
+          enum:
+          - A1
+          - A2
+          - B1
+          - B2
+          - C1
+          - C2
+          title: Cefr Band
+          type: string
+        estimate:
+          $ref: '#/components/schemas/NCLCEstimate'
+        skill:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Skill
+          type: string
+      required:
+      - skill
+      - estimate
+      - cefr_band
+      title: SkillLevel
+      type: object
+    Speaker:
+      additionalProperties: false
+      description: A single speaker in a dialogue or multi-voice clip.
+      properties:
+        accent:
+          enum:
+          - fr-FR
+          - fr-CA
+          - fr-BE
+          - fr-CH
+          - fr-AF
+          - mixed
+          title: Accent
+          type: string
+        label:
+          description: Display label, e.g. 'Speaker A' or 'Annick'.
+          minLength: 1
+          title: Label
+          type: string
+      required:
+      - label
+      - accent
+      title: Speaker
+      type: object
+    SpeakingRubric:
+      additionalProperties: false
+      description: 'The graded output of the Phase 7 EO auto-scorer.
+
+
+        Component invariant: `total_20` is derived from the six components
+
+        by scaling `sum(components)` from `[0, 30]` to `[0, 20]`; off-by-one
+
+        tolerated as in `WritingRubric`.
+
+
+        `phoneme_error_rate` is null when the ASR didn''t deliver a confident
+
+        phoneme alignment (Phase 7 ADR-031 — pronunciation as a coarse
+
+        proxy); the rubric is still valid without it.'
+      properties:
+        fluency_pace:
+          maximum: 5.0
+          minimum: 0.0
+          title: Fluency Pace
+          type: integer
+        grammatical_accuracy:
+          maximum: 5.0
+          minimum: 0.0
+          title: Grammatical Accuracy
+          type: integer
+        interaction_responsiveness:
+          maximum: 5.0
+          minimum: 0.0
+          title: Interaction Responsiveness
+          type: integer
+        lexical_range:
+          maximum: 5.0
+          minimum: 0.0
+          title: Lexical Range
+          type: integer
+        pause_ratio:
+          maximum: 1.0
+          minimum: 0.0
+          title: Pause Ratio
+          type: number
+        phoneme_error_rate:
+          anyOf:
+          - maximum: 1.0
+            minimum: 0.0
+            type: number
+          - type: 'null'
+          title: Phoneme Error Rate
+        pronunciation_prosody:
+          maximum: 5.0
+          minimum: 0.0
+          title: Pronunciation Prosody
+          type: integer
+        task_completion:
+          maximum: 5.0
+          minimum: 0.0
+          title: Task Completion
+          type: integer
+        total_20:
+          maximum: 20.0
+          minimum: 0.0
+          title: Total 20
+          type: integer
+        wpm:
+          minimum: 0.0
+          title: Wpm
+          type: number
+      required:
+      - task_completion
+      - fluency_pace
+      - pronunciation_prosody
+      - lexical_range
+      - grammatical_accuracy
+      - interaction_responsiveness
+      - total_20
+      - wpm
+      - pause_ratio
+      title: SpeakingRubric
+      type: object
+    StudyPlanView:
+      additionalProperties: false
+      description: The current rolling study plan.
+      properties:
+        daily_blocks:
+          items:
+            $ref: '#/components/schemas/DailyBlock'
+          title: Daily Blocks
+          type: array
+        generated_at:
+          format: date-time
+          title: Generated At
+          type: string
+        horizon_days:
+          maximum: 365.0
+          minimum: 1.0
+          title: Horizon Days
+          type: integer
+        id:
+          format: uuid
+          title: Id
+          type: string
+        rationale:
+          description: Plan-level explanation of why this plan was generated.
+          minLength: 1
+          title: Rationale
+          type: string
+        user_id:
+          format: uuid
+          title: User Id
+          type: string
+      required:
+      - id
+      - user_id
+      - generated_at
+      - horizon_days
+      - rationale
+      title: StudyPlanView
+      type: object
+    SubmissionView:
+      additionalProperties: false
+      description: Read-side view of an EE/EO submission.
+      properties:
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/ErrorEnvelope'
+          - type: 'null'
+          description: Set when status='failed'.
+        graded_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Graded At
+        id:
+          format: uuid
+          title: Id
+          type: string
+        item_id:
+          format: uuid
+          title: Item Id
+          type: string
+        module:
+          enum:
+          - EE
+          - EO
+          title: Module
+          type: string
+        payload_bytes:
+          description: Size of the submitted artifact; the artifact itself is not
+            in the response.
+          minimum: 0.0
+          title: Payload Bytes
+          type: integer
+        payload_sha256:
+          description: SHA-256 of the submitted artifact.
+          maxLength: 64
+          minLength: 64
+          pattern: ^[a-f0-9]{64}$
+          title: Payload Sha256
+          type: string
+        rubric_speaking:
+          anyOf:
+          - $ref: '#/components/schemas/SpeakingRubric'
+          - type: 'null'
+          description: Set when status='graded' and module='EO'.
+        rubric_writing:
+          anyOf:
+          - $ref: '#/components/schemas/WritingRubric'
+          - type: 'null'
+          description: Set when status='graded' and module='EE'.
+        status:
+          enum:
+          - pending
+          - grading
+          - graded
+          - failed
+          title: Status
+          type: string
+        submitted_at:
+          format: date-time
+          title: Submitted At
+          type: string
+        user_id:
+          format: uuid
+          title: User Id
+          type: string
+      required:
+      - id
+      - user_id
+      - item_id
+      - module
+      - status
+      - submitted_at
+      - payload_bytes
+      - payload_sha256
+      title: SubmissionView
+      type: object
+    TokenPair:
+      additionalProperties: false
+      description: JWT pair. `access_token` is short-lived; `refresh_token` is long-lived.
+      properties:
+        access_token:
+          title: Access Token
+          type: string
+        access_ttl_s:
+          description: Seconds until access_token expires.
+          maximum: 3600.0
+          minimum: 60.0
+          title: Access Ttl S
+          type: integer
+        refresh_token:
+          title: Refresh Token
+          type: string
+        refresh_ttl_s:
+          description: Seconds until refresh_token expires.
+          minimum: 3600.0
+          title: Refresh Ttl S
+          type: integer
+        token_type:
+          default: Bearer
+          title: Token Type
+          type: string
+      required:
+      - access_token
+      - refresh_token
+      - access_ttl_s
+      - refresh_ttl_s
+      title: TokenPair
+      type: object
+    UpdateMeRequest:
+      additionalProperties: false
+      description: 'Partial update of the profile. Only the supplied fields are changed.
+
+
+        Sending an empty body is a no-op (returns the unchanged profile).'
+      properties:
+        daily_minutes_budget:
+          anyOf:
+          - maximum: 480.0
+            minimum: 15.0
+            type: integer
+          - type: 'null'
+          title: Daily Minutes Budget
+        display_name:
+          anyOf:
+          - maxLength: 80
+            type: string
+          - type: 'null'
+          title: Display Name
+        locale:
+          anyOf:
+          - enum:
+            - en
+            - fr
+            - es
+            - ar
+            - zh
+            type: string
+          - type: 'null'
+          title: Locale
+        privacy_mode:
+          anyOf:
+          - enum:
+            - local_only
+            - cloud_optin
+            type: string
+          - type: 'null'
+          title: Privacy Mode
+        target_exam_date:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          title: Target Exam Date
+        target_nclc:
+          anyOf:
+          - maximum: 12.0
+            minimum: 4.0
+            type: integer
+          - type: 'null'
+          title: Target Nclc
+      title: UpdateMeRequest
+      type: object
+    V1HealthResponse:
+      additionalProperties: false
+      description: Versioned health response.
+      properties:
+        api_version:
+          default: v1
+          title: Api Version
+          type: string
+        phase:
+          default: 2
+          description: The phase that owns the current API surface (frozen contract).
+          title: Phase
+          type: integer
+        schema_version:
+          default: 0.4.0
+          title: Schema Version
+          type: string
+        status:
+          default: ok
+          title: Status
+          type: string
+      title: V1HealthResponse
+      type: object
+    ValidationError:
+      properties:
+        ctx:
+          title: Context
+          type: object
+        input:
+          title: Input
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          title: Location
+          type: array
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+      type: object
+    WeakPoint:
+      additionalProperties: false
+      description: One identified error pattern, derived from interactions + rubrics.
+      properties:
+        last_seen:
+          format: date-time
+          title: Last Seen
+          type: string
+        occurrences:
+          minimum: 1.0
+          title: Occurrences
+          type: integer
+        pattern:
+          description: Short human-readable label, e.g. 'subjunctive after que' or
+            'fr-CA accent confusable'.
+          minLength: 1
+          title: Pattern
+          type: string
+        severity:
+          enum:
+          - low
+          - medium
+          - high
+          title: Severity
+          type: string
+        skill:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Skill
+          type: string
+        suggested_drill:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Pointer to a drill type the planner can schedule (DrillType
+            enum value).
+          title: Suggested Drill
+      required:
+      - skill
+      - pattern
+      - occurrences
+      - last_seen
+      - severity
+      title: WeakPoint
+      type: object
+    WritingRubric:
+      additionalProperties: false
+      description: 'The graded output of the Phase 7 EE auto-scorer.
+
+
+        Component invariant: `total_20` is derived from the five primary
+
+        components (`task_completion`, `coherence_cohesion`, `lexical_range`,
+
+        `grammatical_accuracy`, `register_appropriateness`) by scaling
+
+        `sum(components)` from `[0, 25]` to `[0, 20]`; off-by-one is
+
+        tolerated to allow the Phase 7 calibration layer to nudge the
+
+        total without breaking the contract.
+
+
+        `canadian_context_integration` is non-null only for Task 2 & 3
+
+        (the prompts that require Canadian context per
+
+        `EEContent.required_canadian_context`).'
+      properties:
+        canadian_context_integration:
+          anyOf:
+          - maximum: 5.0
+            minimum: 0.0
+            type: integer
+          - type: 'null'
+          title: Canadian Context Integration
+        coherence_cohesion:
+          maximum: 5.0
+          minimum: 0.0
+          title: Coherence Cohesion
+          type: integer
+        discourse_marker_count:
+          minimum: 0.0
+          title: Discourse Marker Count
+          type: integer
+        error_density_per_100w:
+          minimum: 0.0
+          title: Error Density Per 100W
+          type: number
+        error_list:
+          items:
+            $ref: '#/components/schemas/ErrorAnnotation'
+          title: Error List
+          type: array
+        grammatical_accuracy:
+          maximum: 5.0
+          minimum: 0.0
+          title: Grammatical Accuracy
+          type: integer
+        lexical_range:
+          maximum: 5.0
+          minimum: 0.0
+          title: Lexical Range
+          type: integer
+        register_appropriateness:
+          maximum: 5.0
+          minimum: 0.0
+          title: Register Appropriateness
+          type: integer
+        task_completion:
+          maximum: 5.0
+          minimum: 0.0
+          title: Task Completion
+          type: integer
+        total_20:
+          maximum: 20.0
+          minimum: 0.0
+          title: Total 20
+          type: integer
+        type_token_ratio:
+          maximum: 1.0
+          minimum: 0.0
+          title: Type Token Ratio
+          type: number
+      required:
+      - task_completion
+      - coherence_cohesion
+      - lexical_range
+      - grammatical_accuracy
+      - register_appropriateness
+      - total_20
+      - error_density_per_100w
+      - type_token_ratio
+      - discourse_marker_count
+      title: WritingRubric
+      type: object
+info:
+  description: tcf-accel HTTP API. Phase 2 freezes the /v1/ contract from `02_ARCHITECTURE.md
+    §2.4`; Phases 3–8 implement the handlers.
+  title: tcf-accel API
+  version: 0.1.0
+openapi: 3.1.0
+paths:
+  /healthz:
+    get:
+      description: "Return a fixed payload indicating the process is alive.\n\nReturns:\n\
+        \    A `HealthResponse` with `status=\"ok\"` and the current schema version."
+      operationId: healthz_healthz_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+          description: Successful Response
+      summary: Liveness probe
+      tags:
+      - meta
+  /v1/auth/login:
+    post:
+      description: Authenticate and return a token pair.
+      operationId: login_v1_auth_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+        '501':
+          description: Phase 3 owns this implementation.
+      summary: Exchange credentials for a token pair
+      tags:
+      - auth
+  /v1/auth/refresh:
+    post:
+      description: Exchange a refresh token for a new access token.
+      operationId: refresh_v1_auth_refresh_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+        '501':
+          description: Phase 3 owns this implementation.
+      summary: Refresh the access token
+      tags:
+      - auth
+  /v1/auth/signup:
+    post:
+      description: Create an account and return a token pair.
+      operationId: signup_v1_auth_signup_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+        '501':
+          description: Phase 3 owns this implementation.
+      summary: Create a new account
+      tags:
+      - auth
+  /v1/data:
+    delete:
+      description: Soft-delete the user; durable purge runs nightly.
+      operationId: delete_data_v1_data_delete
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataDeleteResponse'
+          description: Successful Response
+        '501':
+          description: Phase 9 owns this implementation.
+      summary: Schedule erasure of the authenticated user's account
+      tags:
+      - data
+  /v1/data/export:
+    get:
+      description: Stream the user's data as NDJSON.
+      operationId: export_v1_data_export_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+            application/x-ndjson: {}
+          description: NDJSON stream of every interaction, submission, plan, and estimate.
+        '501':
+          description: Phase 9 owns this implementation.
+      summary: Stream the authenticated user's full history as NDJSON
+      tags:
+      - data
+  /v1/diagnostic/start:
+    post:
+      description: 'Begin a fresh adaptive-diagnostic session.
+
+
+        The umbrella session covers all four skills sequentially. The CAT
+
+        advances per skill until each reaches its stopping criterion (variance
+
+        ≤ 0.3 or 15 items).'
+      operationId: start_v1_diagnostic_start_post
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticState'
+          description: Successful Response
+      summary: Start a diagnostic session
+      tags:
+      - diagnostic
+  /v1/diagnostic/{session_id}/answer:
+    post:
+      description: Record one answer and advance the CAT state.
+      operationId: answer_v1_diagnostic__session_id__answer_post
+      parameters:
+      - in: path
+        name: session_id
+        required: true
+        schema:
+          format: uuid
+          title: Session Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiagnosticAnswer'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Submit an answer to a diagnostic item
+      tags:
+      - diagnostic
+  /v1/diagnostic/{session_id}/finish:
+    post:
+      description: 'Close the session and return the report.
+
+
+        Side-effect: writes each skill''s final posterior into the user''s
+
+        `posteriors` dict so subsequent `/v1/plan` and `/v1/insights/readiness`
+
+        calls reflect the diagnostic.'
+      operationId: finish_v1_diagnostic__session_id__finish_post
+      parameters:
+      - in: path
+        name: session_id
+        required: true
+        schema:
+          format: uuid
+          title: Session Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticReport'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Finalize the diagnostic and return per-skill estimates
+      tags:
+      - diagnostic
+  /v1/health:
+    get:
+      description: Liveness probe under `/v1/`.
+      operationId: v1_health_v1_health_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1HealthResponse'
+          description: Successful Response
+      summary: Versioned liveness probe
+      tags:
+      - meta
+  /v1/insights/nclc-trajectory:
+    get:
+      description: Return the trajectory series.
+      operationId: trajectory_v1_insights_nclc_trajectory_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NCLCTrajectory'
+          description: Successful Response
+        '501':
+          description: Phase 8 owns this implementation.
+      summary: Historical per-skill NCLC + forecast
+      tags:
+      - insights
+  /v1/insights/readiness:
+    get:
+      description: 'Compute the readiness traffic light from the current posteriors.
+
+
+        Phase 4 (this route) is the gate that enforces "no green without
+
+        confidence" — the planner is forbidden by ADR-025 from showing
+
+        green when any skill''s `confident=False`.'
+      operationId: readiness_v1_insights_readiness_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Readiness'
+          description: Successful Response
+      summary: Traffic-light 'ready to book the exam?' answer
+      tags:
+      - insights
+  /v1/insights/weak-points:
+    get:
+      description: Return the ranked weak-point list.
+      operationId: weak_points_v1_insights_weak_points_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/WeakPoint'
+                title: Response Weak Points V1 Insights Weak Points Get
+                type: array
+          description: Successful Response
+        '501':
+          description: Phase 8 owns this implementation.
+      summary: Top error patterns per skill
+      tags:
+      - insights
+  /v1/me:
+    get:
+      description: Return the authenticated user's profile.
+      operationId: get_me_v1_me_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeProfile'
+          description: Successful Response
+        '501':
+          description: Phase 3 owns this implementation.
+      summary: Fetch the authenticated user's profile
+      tags:
+      - me
+    patch:
+      description: Apply a partial update to the profile.
+      operationId: patch_me_v1_me_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMeRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeProfile'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+        '501':
+          description: Phase 3 owns this implementation.
+      summary: Partially update the authenticated user's profile
+      tags:
+      - me
+  /v1/me/accessibility:
+    get:
+      description: 'Return the learner''s accessibility preferences.
+
+
+        Local-only per ADR-017; the profile drives session-time drill
+
+        routing (e.g., `co_alternative="lexical_alt"` swaps CO drills for
+
+        the lexical alternative — `phase5_design.md §7`).'
+      operationId: get_accessibility_v1_me_accessibility_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessibilityProfile'
+          description: Successful Response
+      summary: Fetch the learner's accessibility profile (ADR-029)
+      tags:
+      - me
+    patch:
+      description: Replace the learner's accessibility profile with the submitted
+        one.
+      operationId: patch_accessibility_v1_me_accessibility_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessibilityProfile'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessibilityProfile'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Update the learner's accessibility profile
+      tags:
+      - me
+  /v1/mock-exam/start:
+    post:
+      description: 'Create a new mock-exam session.
+
+
+        Enforces ADR-033 cadence cap. `mode=canonical` is the default
+
+        and the only mode that updates the NCLC posterior.'
+      operationId: start_v1_mock_exam_start_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MockExamStart'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MockExamState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Start a full mock exam (Phase 6 owner)
+      tags:
+      - mock-exam
+  /v1/mock-exam/{exam_id}/advance:
+    post:
+      description: 'Advance to the next state.
+
+
+        Used by the player when the module timer expires or the learner
+
+        submits a module early. The break clocks also advance via this
+
+        endpoint.'
+      operationId: advance_v1_mock_exam__exam_id__advance_post
+      parameters:
+      - in: path
+        name: exam_id
+        required: true
+        schema:
+          format: uuid
+          title: Exam Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MockExamState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Advance through the exam state machine (Phase 6 additive)
+      tags:
+      - mock-exam
+  /v1/mock-exam/{exam_id}/answer:
+    post:
+      description: 'Record one item''s outcome.
+
+
+        The server owns the correct-answer key — the client sends only the
+
+        selected option id; correctness is derived here so a tampered
+
+        client cannot inflate the score.'
+      operationId: answer_v1_mock_exam__exam_id__answer_post
+      parameters:
+      - in: path
+        name: exam_id
+        required: true
+        schema:
+          format: uuid
+          title: Exam Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MockExamAnswer'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MockExamState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Record an MCQ or rubric outcome
+      tags:
+      - mock-exam
+  /v1/mock-exam/{exam_id}/co-play:
+    post:
+      description: 'Increment the play count for a CO item; refuse if already played.
+
+
+        ADR-029 + `phase6_think.md §2.3`: each CO audio plays exactly once
+
+        per mock. The server tracks the count; the client cannot re-trigger.'
+      operationId: co_play_v1_mock_exam__exam_id__co_play_post
+      parameters:
+      - in: path
+        name: exam_id
+        required: true
+        schema:
+          format: uuid
+          title: Exam Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MockExamCoPlay'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MockExamState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Record a CO audio play (single play enforced server-side)
+      tags:
+      - mock-exam
+  /v1/mock-exam/{exam_id}/items/{module}:
+    get:
+      description: 'Return the redacted items for one module.
+
+
+        The response is a list of dicts (not typed `Item`) because the
+
+        redaction layer strips fields that the frozen `Item` model requires
+
+        — see `phase6_design.md §10.1`.'
+      operationId: get_items_v1_mock_exam__exam_id__items__module__get
+      parameters:
+      - in: path
+        name: exam_id
+        required: true
+        schema:
+          format: uuid
+          title: Exam Id
+          type: string
+      - in: path
+        name: module
+        required: true
+        schema:
+          enum:
+          - CO
+          - CE
+          - EE
+          - EO
+          title: Module
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response Get Items V1 Mock Exam  Exam Id  Items  Module  Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Module items (redacted; answer keys never included)
+      tags:
+      - mock-exam
+  /v1/mock-exam/{exam_id}/report:
+    get:
+      description: 'Return the headline report.
+
+
+        The full Markdown/HTML report lives at `item_log_uri`; the wire
+
+        response is intentionally compact (see `phase6_design.md §7`).'
+      operationId: get_report_v1_mock_exam__exam_id__report_get
+      parameters:
+      - in: path
+        name: exam_id
+        required: true
+        schema:
+          format: uuid
+          title: Exam Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MockExamReport'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Fetch the scored mock-exam report
+      tags:
+      - mock-exam
+  /v1/mock-exam/{exam_id}/state:
+    get:
+      description: Return the current state envelope — no answer fields, ever.
+      operationId: get_state_v1_mock_exam__exam_id__state_get
+      parameters:
+      - in: path
+        name: exam_id
+        required: true
+        schema:
+          format: uuid
+          title: Exam Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MockExamState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Current mock-exam state (never reveals answers)
+      tags:
+      - mock-exam
+  /v1/mock-exam/{exam_id}/submit:
+    post:
+      description: 'Move to FINISHED, enqueue the scoring task, then SCORED.
+
+
+        Training mode mocks are scored but do *not* update the user''s
+
+        canonical mock streak; the report renderer flags this.'
+      operationId: submit_v1_mock_exam__exam_id__submit_post
+      parameters:
+      - in: path
+        name: exam_id
+        required: true
+        schema:
+          format: uuid
+          title: Exam Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MockExamState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Submit the mock for scoring
+      tags:
+      - mock-exam
+  /v1/mock-exam/{exam_id}/tab-blur:
+    post:
+      description: 'Apply the canonical-mode forfeit rule.
+
+
+        `phase6_design.md §10.3` + ADR-032: in canonical mode, a tab-blur
+
+        longer than `CANONICAL_TAB_BLUR_GRACE_S` forfeits the mock. Training
+
+        mode no-ops.'
+      operationId: tab_blur_v1_mock_exam__exam_id__tab_blur_post
+      parameters:
+      - in: path
+        name: exam_id
+        required: true
+        schema:
+          format: uuid
+          title: Exam Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MockExamTabBlur'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MockExamState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Report a tab-blur event; canonical forfeits past the grace window
+      tags:
+      - mock-exam
+  /v1/plan:
+    get:
+      description: Return the active plan; 404 with `E_NOT_FOUND` if none exists yet.
+      operationId: get_plan_v1_plan_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyPlanView'
+          description: Successful Response
+      summary: Fetch the current rolling study plan
+      tags:
+      - plan
+  /v1/plan/regenerate:
+    post:
+      description: Generate a new plan and supersede the previous one.
+      operationId: regenerate_v1_plan_regenerate_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyPlanView'
+          description: Successful Response
+      summary: Force a plan regeneration
+      tags:
+      - plan
+  /v1/plan/today:
+    get:
+      description: Return only today's blocks (subset of `GET /v1/plan`).
+      operationId: today_v1_plan_today_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/DailyBlock'
+                title: Response Today V1 Plan Today Get
+                type: array
+          description: Successful Response
+      summary: Fetch today's blocks only
+      tags:
+      - plan
+  /v1/session/exam-shape/dismiss:
+    post:
+      description: 'Record an exam-shape-floor dismissal for the current ISO week.
+
+
+        The dismissal is logged (local-only per ADR-017) and lets the
+
+        learner start non-exam-shape drills for the rest of the week. The
+
+        operator''s `audit-exam-shape` flags chronic dismissals.'
+      operationId: dismiss_exam_shape_v1_session_exam_shape_dismiss_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                title: Response Dismiss Exam Shape V1 Session Exam Shape Dismiss Post
+                type: object
+          description: Successful Response
+      summary: Dismiss the exam-shape floor for the current ISO week (ADR-028)
+      tags:
+      - session
+  /v1/session/start:
+    post:
+      description: 'Initialize a session with the requested module and drill type.
+
+
+        Enforces the exam-shape floor (ADR-028): a non-exam-shape drill is
+
+        refused with 409 if the learner has logged zero exam-shape minutes
+
+        in the rolling 7-day window and has not dismissed the floor this
+
+        week.'
+      operationId: start_v1_session_start_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionStart'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Start a practice session
+      tags:
+      - session
+  /v1/session/{session_id}/answer:
+    post:
+      description: 'Grade an answer, update the posterior, and advance the session.
+
+
+        Idempotent on `item_id`: a duplicate submission returns the current
+
+        state without re-grading (matches `phase5_design.md §3.2`).'
+      operationId: answer_v1_session__session_id__answer_post
+      parameters:
+      - in: path
+        name: session_id
+        required: true
+        schema:
+          format: uuid
+          title: Session Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionAnswer'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Submit an answer mid-session
+      tags:
+      - session
+  /v1/session/{session_id}/finish:
+    post:
+      description: Close the session and return the summary with the posterior delta.
+      operationId: finish_v1_session__session_id__finish_post
+      parameters:
+      - in: path
+        name: session_id
+        required: true
+        schema:
+          format: uuid
+          title: Session Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionSummary'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Close the session and commit FSRS state
+      tags:
+      - session
+  /v1/session/{session_id}/next:
+    get:
+      description: Serve the next unanswered item; 409 once the queue is exhausted.
+      operationId: next_item_v1_session__session_id__next_get
+      parameters:
+      - in: path
+        name: session_id
+        required: true
+        schema:
+          format: uuid
+          title: Session Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionItem'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Fetch the next item per the scheduler
+      tags:
+      - session
+  /v1/session/{session_id}/pause:
+    post:
+      description: Pause an in-flight session.
+      operationId: pause_v1_session__session_id__pause_post
+      parameters:
+      - in: path
+        name: session_id
+        required: true
+        schema:
+          format: uuid
+          title: Session Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Pause a session (resumable within 24h)
+      tags:
+      - session
+  /v1/session/{session_id}/resume:
+    post:
+      description: Resume a paused session; 410 if more than 24 h elapsed.
+      operationId: resume_v1_session__session_id__resume_post
+      parameters:
+      - in: path
+        name: session_id
+        required: true
+        schema:
+          format: uuid
+          title: Session Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionState'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Resume a paused session (410 if the 24h window expired)
+      tags:
+      - session
+  /v1/submission/ee:
+    post:
+      description: Enqueue an EE submission for the Phase 7 writing scorer.
+      operationId: submit_ee_v1_submission_ee_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_submit_ee_v1_submission_ee_post'
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionView'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Submit a written response for async grading
+      tags:
+      - submission
+  /v1/submission/eo:
+    post:
+      description: Enqueue an EO submission for the Phase 7 speaking scorer.
+      operationId: submit_eo_v1_submission_eo_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_submit_eo_v1_submission_eo_post'
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionView'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Submit a recorded response for async grading
+      tags:
+      - submission
+  /v1/submission/{submission_id}:
+    get:
+      description: Return the submission's current status and (when graded) its rubric.
+      operationId: get_submission_view_v1_submission__submission_id__get
+      parameters:
+      - in: path
+        name: submission_id
+        required: true
+        schema:
+          format: uuid
+          title: Submission Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionView'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Poll a submission's grading status
+      tags:
+      - submission

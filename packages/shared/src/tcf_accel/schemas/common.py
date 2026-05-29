@@ -38,6 +38,8 @@ class QualityFlag(str, Enum):
     LICENSE_AMBIGUOUS = "license_ambiguous"
     ACOUSTIC_LOW_QUALITY = "acoustic_low_quality"
     REGISTER_MISMATCH = "register_mismatch"
+    CEFR_HUMAN_OVERRIDDEN = "cefr_human_overridden"
+    TOPIC_OVER_CAPPED = "topic_over_capped"
 
 
 class Provenance(BaseModel):
@@ -82,7 +84,14 @@ class Provenance(BaseModel):
 
 
 class ItemMetadata(BaseModel):
-    """Open-ended metadata bag for retrieval, clustering, and analytics."""
+    """Open-ended metadata bag for retrieval, clustering, and analytics.
+
+    The model remains `extra="allow"`, so any field not listed here is
+    accepted and round-trips through the JSONB column. The fields
+    enumerated below are *documented* surfaces — populated by the
+    Phase 3 content pipeline and consumed by Phase 4+. Adding a new
+    optional field here is a non-breaking change.
+    """
 
     model_config = ConfigDict(extra="allow")
 
@@ -93,4 +102,37 @@ class ItemMetadata(BaseModel):
     seed: int | None = Field(
         default=None,
         description="Deterministic seed used during synthesis; enables reproducibility.",
+    )
+    # ─── Phase 3 additive surfaces (all optional) ──────────────
+    cefr_confidence: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Max-softmax post-calibration probability from the CEFR classifier.",
+    )
+    cefr_distribution: dict[str, float] | None = Field(
+        default=None,
+        description="Full A1..C2 softmax distribution at the time the item was classified.",
+    )
+    canadian_context: bool | None = Field(
+        default=None,
+        description="True iff the item's content is Canadian-flavored (EE/EO Tasks 2&3 require True).",
+    )
+    co_acoustic: dict[str, float] | None = Field(
+        default=None,
+        description=(
+            "CO-only acoustic features: keys 'speech_rate_wpm', 'lexical_density', "
+            "'n_speakers_diarized', 'noisiness_proxy'."
+        ),
+    )
+    calibration_anchors: dict[str, str] | None = Field(
+        default=None,
+        description=(
+            "EE/EO-only model-response anchors keyed by 'nclc_7', 'nclc_9', 'nclc_11'; "
+            "Phase 7 calibrates the rubric scorer against these."
+        ),
+    )
+    synthesis_trace_uri: str | None = Field(
+        default=None,
+        description="Local-only pointer to data/cache/quality/<item_id>.json with the full synthesis trace.",
     )

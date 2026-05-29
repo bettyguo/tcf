@@ -1,15 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-// Phase 1 smoke: vitest is wired and runs at least one assertion.
-// Phase 8 introduces React Testing Library + Playwright suites.
-
 describe("vitest smoke", () => {
   it("runs", () => {
     expect(1 + 1).toBe(2);
   });
 
-  it("imports something Next-shaped without crashing", async () => {
+  it("imports the root page module", async () => {
     const mod = await import("../app/page");
     expect(typeof mod.default).toBe("function");
+  });
+
+  it("imports lib/types", async () => {
+    const mod = await import("@/lib/types");
+    expect(mod.skills.length).toBe(4);
   });
 });

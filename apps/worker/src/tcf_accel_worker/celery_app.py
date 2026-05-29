@@ -40,14 +40,19 @@ def _make_app() -> Celery:
         "tcf_accel_worker",
         broker=BROKER_URL,
         backend=RESULT_BACKEND,
-        include=["tcf_accel_worker.tasks.smoke"],
+        include=[
+            "tcf_accel_worker.tasks.smoke",
+            "tcf_accel_worker.tasks.score_ee",
+            "tcf_accel_worker.tasks.score_eo",
+            "tcf_accel_worker.tasks.score_mock",
+        ],
     )
     app.conf.update(
         task_acks_late=True,
         task_reject_on_worker_lost=True,
         task_serializer="json",
         result_serializer="json",
-        accept_content=["json"],          # no pickle — security + reproducibility
+        accept_content=["json"],  # no pickle — security + reproducibility
         worker_concurrency=WORKER_CONCURRENCY,
         worker_max_tasks_per_child=WORKER_MAX_TASKS_PER_CHILD,
         worker_hijack_root_logger=False,
