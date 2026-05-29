@@ -155,7 +155,7 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
         <ul>
           <li><a href="{{ '/OPERATIONS/' | relative_url }}">Operations runbook<span class="li-desc">Stand-up, env vars, JWT rotation, backups, alarms.</span></a></li>
           <li><a href="{{ '/ARCHITECTURE/' | relative_url }}">Architecture<span class="li-desc">Eight surfaces; ADR-indexed.</span></a></li>
-          <li><a href="{{ '/README/' | relative_url }}">5-minute setup<span class="li-desc"><code>make setup &amp;&amp; make verify</code>.</span></a></li>
+          <li><a href="https://github.com/bettyguo/tcf#quickstart-5-minutes">5-minute setup<span class="li-desc"><code>make setup &amp;&amp; make verify</code> (on GitHub).</span></a></li>
         </ul>
       </article>
       <article class="audience-card">
