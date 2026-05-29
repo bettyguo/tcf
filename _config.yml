@@ -53,7 +53,7 @@ optional_front_matter:
 
 titles_from_headings:
   enabled: true
-  strip_title: false
+  strip_title: true
   collections: true
 
 # Top navigation. Each entry is rendered in _includes/nav.html.
