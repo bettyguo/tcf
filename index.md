@@ -57,8 +57,8 @@ If you're here to grade our claims:
 
 ## For contributors
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) — dev loop, branching, PR
-  checklist.
+- [CONTRIBUTING.md](https://github.com/bettyguo/tcf/blob/main/CONTRIBUTING.md)
+  — dev loop, branching, PR checklist.
 - [v1.1 roadmap](docs/roadmap/v1.1.md) — the "what's missing" list,
   pre-empted.
 - [Architecture Decision Records](docs/adrs/) — 48 ADRs covering every
