@@ -1229,6 +1229,33 @@
         wpmEl.textContent = wpms[Math.floor(wpms.length / 2)] + " wpm";
       } else wpmEl.textContent = "—";
     }
+    renderLeeches(srs);
+  }
+
+  function renderLeeches(srs) {
+    var panel = document.getElementById("leech-panel");
+    var list = document.getElementById("leech-list");
+    if (!panel || !list) return;
+    var leeches = [];
+    Object.keys(srs).forEach(function (id) {
+      var st = srs[id];
+      if (!st || st.ease == null) return;
+      if (st.ease < 1.5 && (st.reps == null || st.reps < 5)) {
+        var card = ALL_DECK.find(function (c) { return c.id === id; });
+        if (card) leeches.push({ card: card, ease: st.ease, lastQ: st.lastQ });
+      }
+    });
+    leeches.sort(function (a, b) { return a.ease - b.ease; });
+    leeches = leeches.slice(0, 12);
+    if (!leeches.length) { panel.hidden = true; return; }
+    panel.hidden = false;
+    list.innerHTML = leeches.map(function (l) {
+      return '<li class="leech-item">' +
+        '<span class="leech-fr" lang="fr">' + l.card.fr + '</span>' +
+        '<span class="leech-en" lang="en">' + l.card.en + '</span>' +
+        '<span class="leech-ease">ease ' + l.ease.toFixed(2) + '</span>' +
+        '</li>';
+    }).join("");
   }
 
   // Export / reset

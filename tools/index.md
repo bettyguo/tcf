@@ -23,6 +23,8 @@ body_class: page-tools
   <a href="#dates">③ Dates &amp; time</a>
   <a href="#accents">④ Accent helper</a>
   <a href="#ipa">⑤ IPA phoneme chart</a>
+  <a href="#gender">⑥ Gender helper</a>
+  <a href="#liaison">⑦ Liaison preview</a>
 </nav>
 
 ## ① Verb conjugator — 32 essential verbs × 7 tenses {#conjugator}
@@ -169,6 +171,49 @@ body_class: page-tools
     <div class="ipa-grid" id="ipa-consonants"></div>
   </div>
   <p class="demo-note">IPA values from Tranel (1987); example minimal pairs from Walker (2001). TTS rendering depends on the voice quality on your OS — Apple's <em>Amélie</em> (fr-CA) is the cleanest distinction of <em>/ɛ̃/</em> vs <em>/œ̃/</em>; Microsoft's older voices merge them.</p>
+</section>
+
+## ⑥ Gender helper — pattern-based, not memorised {#gender}
+
+> French nouns force a gender choice on every article and many adjective endings. ~80 % of nouns follow predictable suffix patterns — type a noun (or paste a sentence) and the helper highlights probable gender for each token, with confidence. Override list covers the high-frequency exceptions (<em>le silence, le génie, la peau, …</em>).
+
+<section class="learn-card tool-card" data-tool="gen">
+  <label for="gen-input" class="nclc-control-label">Noun or short phrase</label>
+  <input type="text" id="gen-input" class="select" placeholder="e.g. citoyenneté, voyage, problème…" lang="fr" autocomplete="off" />
+  <div class="num-quick">
+    <button class="chip" data-jump-gen="citoyenneté">citoyenneté</button>
+    <button class="chip" data-jump-gen="voyage">voyage</button>
+    <button class="chip" data-jump-gen="problème">problème</button>
+    <button class="chip" data-jump-gen="silence">silence</button>
+    <button class="chip" data-jump-gen="peau">peau</button>
+    <button class="chip" data-jump-gen="bonheur">bonheur</button>
+    <button class="chip" data-jump-gen="entreprise">entreprise</button>
+    <button class="chip" data-jump-gen="système">système</button>
+  </div>
+  <div class="gen-readout" id="gen-readout" aria-live="polite">
+    <!-- Filled by tools.js -->
+  </div>
+  <p class="demo-note">Suffix patterns by frequency: <em>-tion, -sion, -té, -ette, -ence, -ance, -ure, -ée, -eur</em> → typically feminine. <em>-age, -ment, -isme, -eau, -ier, -in, -eur (agent), -on</em> → typically masculine. The helper applies these and then overrides with the 80-word exception list (e.g. <em>silence</em> looks like <em>-ence</em> but is masculine). For ambiguous cases it reports both with confidence &lt; 70%.</p>
+</section>
+
+## ⑦ Liaison preview — where sound bridges between words {#liaison}
+
+> French liaison rules trip up listening because they're invisible in writing. Paste a short phrase; the preview marks every <strong>obligatory</strong>, <strong>optional</strong>, and <strong>forbidden</strong> liaison with the consonant that surfaces (often a silent <em>s/t/n</em> reactivated as /z/, /t/, /n/). Useful before recording yourself or after missing a dictée word.
+
+<section class="learn-card tool-card" data-tool="liz">
+  <label for="liz-input" class="nclc-control-label">Phrase</label>
+  <textarea id="liz-input" class="dict-input" rows="2" lang="fr" autocapitalize="sentences" autocomplete="off" placeholder="Tapez une phrase courte. Par exemple : « Les enfants vont en classe. »"></textarea>
+  <div class="num-quick">
+    <button class="chip" data-jump-liz="Les enfants vont en classe.">Les enfants vont en classe.</button>
+    <button class="chip" data-jump-liz="Nous avons un ami.">Nous avons un ami.</button>
+    <button class="chip" data-jump-liz="Les hommes et les femmes.">Les hommes et les femmes.</button>
+    <button class="chip" data-jump-liz="Vous êtes en avance.">Vous êtes en avance.</button>
+    <button class="chip" data-jump-liz="C'est un beau hibou.">C'est un beau hibou.</button>
+  </div>
+  <div class="liz-readout" id="liz-readout" aria-live="polite">
+    <!-- Filled by tools.js -->
+  </div>
+  <p class="demo-note">Obligatoires (in green): article + noun (<em>les_amis</em>), pronoun + verb (<em>nous_avons</em>), monosyllabic prepositions (<em>en_avance</em>). Interdites (in red): before an <em>h aspiré</em> (<em>les / hibou</em>, no liaison), after <em>et</em>, before some proper nouns. Facultatives (in yellow): in careful speech but commonly dropped (<em>vous êtes_arrivés</em>). The rule list is heuristic and won't cover every edge case — but it gets the 90 % that show up in TCF dictées.</p>
 </section>
 
 ---

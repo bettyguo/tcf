@@ -11,7 +11,7 @@ permalink: /sw.js
  *   - Cap cache size to 80 entries.
  *   - Skip Web Speech API / cross-origin / non-GET.
  */
-const VERSION = "tcf-1.0.2";
+const VERSION = "tcf-1.0.3";
 const CORE = "tcf-core-" + VERSION;
 const ASSETS = "tcf-assets-" + VERSION;
 const PAGES = "tcf-pages-" + VERSION;
@@ -21,6 +21,7 @@ const CORE_URLS = [
   "{{ '/practice/' | relative_url }}",
   "{{ '/learn/' | relative_url }}",
   "{{ '/tools/' | relative_url }}",
+  "{{ '/glossary/' | relative_url }}",
   "{{ '/try/' | relative_url }}",
   "{{ '/search/' | relative_url }}",
   "{{ '/LIMITATIONS/' | relative_url }}",

@@ -1,0 +1,62 @@
+---
+layout: null
+sitemap: false
+permalink: /feed.xml
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+  <title>{{ site.title }} — release notes</title>
+  <subtitle>{{ site.description | strip_html | strip_newlines }}</subtitle>
+  <link rel="self" type="application/atom+xml" href="{{ '/feed.xml' | absolute_url }}" />
+  <link rel="alternate" type="text/html" href="{{ '/CHANGELOG/' | absolute_url }}" />
+  <id>{{ '/feed.xml' | absolute_url }}</id>
+  <updated>{{ site.time | date_to_xmlschema }}</updated>
+  <generator uri="https://jekyllrb.com/" version="{{ jekyll.version }}">Jekyll</generator>
+  <icon>{{ '/assets/img/favicon.svg' | absolute_url }}</icon>
+
+  {%- comment -%}
+    Surface the top of CHANGELOG.md as a single rolling entry — the changelog
+    itself is the canonical source. A more granular per-release feed could
+    be generated from a _posts collection in v1.1.
+  {%- endcomment -%}
+
+  <entry>
+    <title>v1.0.0 — launched 2026-05-28</title>
+    <id>{{ '/CHANGELOG/#100--2026-05-28' | absolute_url }}</id>
+    <link rel="alternate" type="text/html" href="{{ '/CHANGELOG/' | absolute_url }}" />
+    <updated>2026-05-28T00:00:00Z</updated>
+    <published>2026-05-28T00:00:00Z</published>
+    <author><name>tcf-accel contributors</name></author>
+    <summary type="text">
+      v1.0.0 closes the build phase. Every functional surface (plan, drills, mock
+      exam, scoring, insights, readiness) audited end-to-end. Twelve launch gates
+      green; signed LAUNCH_READINESS_REPORT.md; published κ tables; honest
+      refusal verified across 12 synthetic cohorts × 100 trajectories.
+    </summary>
+    <content type="text">
+      See CHANGELOG.md for the full release log. Reading order:
+      1) LIMITATIONS.md (start here — twelve things this system does not promise),
+      2) LAUNCH_READINESS_REPORT.md (signed; bundle SHA-256 inside),
+      3) PEDAGOGY.md (eight SLA principles tied to code + tests + ADRs),
+      4) ARCHITECTURE.md (eight surfaces, ADR-indexed),
+      5) the 48 ADRs at /adrs/.
+    </content>
+  </entry>
+
+  <entry>
+    <title>GitHub Pages — interactive studio, mechanics toolkit, glossary</title>
+    <id>{{ '/' | absolute_url }}#docs-2026-05-29</id>
+    <link rel="alternate" type="text/html" href="{{ '/' | absolute_url }}" />
+    <updated>2026-05-29T00:00:00Z</updated>
+    <published>2026-05-29T00:00:00Z</published>
+    <author><name>tcf-accel contributors</name></author>
+    <summary type="text">
+      Post-launch docs polish: interactive Learner studio (/learn/), Practice
+      studio (/practice/), Try-it readiness demo (/try/), Mechanics toolkit
+      (/tools/) with a 32-verb conjugator across 7 tenses, number-to-French,
+      date and time builder, accent helper, IPA chart, gender helper, and
+      liaison preview. Glossary at /glossary/. PWA install, command palette,
+      offline cache, dark/light theme.
+    </summary>
+  </entry>
+</feed>

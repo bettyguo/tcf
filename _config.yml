@@ -96,7 +96,9 @@ footer:
       - { title: "Practice (interactive)", url: "/practice/" }
       - { title: "Learner studio (interactive)", url: "/learn/" }
       - { title: "Mechanics toolkit (interactive)", url: "/tools/" }
+      - { title: "Glossary", url: "/glossary/" }
       - { title: "Search", url: "/search/" }
+      - { title: "Release notes feed (Atom)", url: "/feed.xml" }
   - title: "Verify"
     links:
       - { title: "Launch Readiness Report", url: "/LAUNCH_READINESS_REPORT/" }

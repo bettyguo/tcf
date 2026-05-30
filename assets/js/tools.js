@@ -581,6 +581,206 @@
     });
   }
 
+  /* ────────────────────────────────────────────────────────────
+   * ⑥ Gender helper
+   * ──────────────────────────────────────────────────────────── */
+
+  // Override list for high-frequency exceptions. f=feminine, m=masculine.
+  // Lowercased, accent-preserved keys.
+  var GENDER_OVERRIDES = {
+    // Looks feminine by suffix but masculine:
+    "silence": "m", "génie": "m", "musée": "m", "lycée": "m", "trophée": "m",
+    "athée": "m", "scarabée": "m", "pygmée": "m", "mausolée": "m",
+    "rez-de-chaussée": "m",
+    "incendie": "m", "génocide": "m", "remède": "m",
+    // Looks masculine by suffix but feminine:
+    "peau": "f", "eau": "f", "main": "f", "fin": "f", "faim": "f",
+    "souris": "f", "perdrix": "f", "noix": "f", "voix": "f", "croix": "f",
+    "image": "f", "page": "f", "cage": "f", "plage": "f", "rage": "f",
+    "tige": "f", "horloge": "f", "loge": "f",
+    "dent": "f", "jument": "f",
+    // Common short words:
+    "chose": "f", "fois": "f", "loi": "f", "foi": "f",
+    "amour": "m", "honneur": "m", "bonheur": "m", "labeur": "m", "malheur": "m",
+    "humeur": "f", "douleur": "f", "couleur": "f", "fleur": "f", "chaleur": "f", "peur": "f", "vapeur": "f", "rumeur": "f", "valeur": "f", "saveur": "f",
+    // Greek-origin -e words (usually masculine):
+    "problème": "m", "thème": "m", "système": "m", "schéma": "m", "diplôme": "m", "drame": "m", "programme": "m", "axe": "m", "code": "m", "mode": "m",
+    "période": "f", "méthode": "f"
+  };
+
+  function guessGender(wordRaw) {
+    var word = (wordRaw || "").toLowerCase().replace(/[.,;:!?«»"'()…—–]/g, "").trim();
+    if (!word) return null;
+    if (GENDER_OVERRIDES[word]) return { gender: GENDER_OVERRIDES[word], confidence: 0.98, rule: "override list" };
+    // Strict suffix rules with rough confidence.
+    var rules = [
+      // feminine markers
+      { suf: "tion",  g: "f", c: 0.97 }, { suf: "sion", g: "f", c: 0.95 },
+      { suf: "ité",   g: "f", c: 0.97 }, { suf: "té",   g: "f", c: 0.85 },
+      { suf: "ette",  g: "f", c: 0.96 },
+      { suf: "ence",  g: "f", c: 0.90 }, { suf: "ance", g: "f", c: 0.92 },
+      { suf: "ure",   g: "f", c: 0.85 },
+      { suf: "esse",  g: "f", c: 0.93 },
+      { suf: "ée",    g: "f", c: 0.80 },
+      { suf: "ie",    g: "f", c: 0.78 },
+      // masculine markers
+      { suf: "age",   g: "m", c: 0.88 },
+      { suf: "ment",  g: "m", c: 0.95 },
+      { suf: "isme",  g: "m", c: 0.97 },
+      { suf: "eau",   g: "m", c: 0.92 },
+      { suf: "ier",   g: "m", c: 0.85 },
+      { suf: "oir",   g: "m", c: 0.82 },
+      { suf: "ail",   g: "m", c: 0.85 },
+      { suf: "in",    g: "m", c: 0.78 },
+      { suf: "on",    g: "m", c: 0.72 },
+      { suf: "ateur", g: "m", c: 0.92 }
+    ];
+    for (var i = 0; i < rules.length; i++) {
+      if (word.endsWith(rules[i].suf)) {
+        return { gender: rules[i].g, confidence: rules[i].c, rule: "suffix « -" + rules[i].suf + " »" };
+      }
+    }
+    // Fallback: unknown
+    return { gender: "?", confidence: 0.0, rule: "no recognized suffix; check a dictionary" };
+  }
+
+  function renderGender() {
+    var inp = document.getElementById("gen-input");
+    var raw = (inp.value || "").trim();
+    var out = document.getElementById("gen-readout");
+    if (!raw) { out.innerHTML = '<p class="muted">Type a noun or short phrase above.</p>'; return; }
+    var tokens = raw.split(/\s+/).filter(Boolean);
+    var html = '<table class="gen-table"><thead><tr><th>Mot</th><th>Genre</th><th>Article</th><th>Confiance</th><th>Règle</th></tr></thead><tbody>';
+    tokens.forEach(function (t) {
+      var g = guessGender(t);
+      if (!g) return;
+      var label = g.gender === "f" ? "féminin" : g.gender === "m" ? "masculin" : "ambigu";
+      var color = g.gender === "f" ? "gen-f" : g.gender === "m" ? "gen-m" : "gen-x";
+      var article;
+      var firstChar = (t.toLowerCase().replace(/[.,;:!?«»"'()…—–]/g, "")[0] || "");
+      var isVowel = ["a","e","i","o","u","é","è","ê","â","î","ô","û","h"].indexOf(firstChar) >= 0;
+      if (g.gender === "m") article = isVowel ? "l'" + t + " · un " + t : "le " + t + " · un " + t;
+      else if (g.gender === "f") article = isVowel ? "l'" + t + " · une " + t : "la " + t + " · une " + t;
+      else article = "—";
+      var conf = Math.round(g.confidence * 100) + "%";
+      html += '<tr><td lang="fr"><strong>' + t + '</strong></td><td class="' + color + '">' + label + '</td><td lang="fr">' + article + '</td><td>' + conf + '</td><td>' + g.rule + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    out.innerHTML = html;
+  }
+  function initGender() {
+    var inp = document.getElementById("gen-input");
+    if (!inp) return;
+    inp.addEventListener("input", renderGender);
+    document.querySelectorAll("[data-jump-gen]").forEach(function (b) {
+      b.addEventListener("click", function () { inp.value = b.dataset.jumpGen; renderGender(); });
+    });
+    inp.value = "citoyenneté";
+    renderGender();
+  }
+
+  /* ────────────────────────────────────────────────────────────
+   * ⑦ Liaison preview
+   * ──────────────────────────────────────────────────────────── */
+
+  // h aspiré words — liaison FORBIDDEN. Compact list of high-frequency ones.
+  var H_ASPIRE = new Set([
+    "hibou","haricot","hauteur","haine","handicap","hameau","hangar","hanche",
+    "harpe","hasard","hâte","hennir","hérisson","héros","hibou","hiérarchie",
+    "hockey","honte","hors","huit","hurler","hutte","haut","huitième","houx"
+  ]);
+  // Pronouns / determiners that trigger obligatoire liaison.
+  var OBL_TRIGGER = new Set([
+    "les","des","ces","mes","tes","ses","nos","vos","leurs",
+    "un","deux","trois","six","dix",
+    "nous","vous","ils","elles","on",
+    "en","dans","sans","sous","chez",
+    "quand","dont"
+  ]);
+  var ET_TRIGGER = "et"; // ALWAYS forbids liaison.
+
+  function isVowelStart(w) {
+    var ch = (w || "").toLowerCase().replace(/[.,;:!?«»"'()…—–]/g, "").charAt(0);
+    return ["a","e","i","o","u","y","à","â","ä","é","è","ê","ë","î","ï","ô","ö","ù","û","ü"].indexOf(ch) >= 0
+      || (ch === "h" && !H_ASPIRE.has((w || "").toLowerCase().replace(/[.,;:!?«»"'()…—–]/g, "")));
+  }
+  function endsConsForLiaison(w) {
+    // Last char in the lower-cased, punctuation-stripped form. We care about silent s/x/z/t/d/n/p/r linkers.
+    var cleaned = (w || "").toLowerCase().replace(/[.,;:!?«»"'()…—–]/g, "");
+    var last = cleaned.charAt(cleaned.length - 1);
+    return ["s","x","z","t","d","n","p","r","g"].indexOf(last) >= 0 ? last : null;
+  }
+  function linkSound(c) {
+    return { s: "z", x: "z", z: "z", t: "t", d: "t", n: "n", p: "p", r: "ʁ", g: "k" }[c] || "?";
+  }
+  function liaisonKind(prevWord, nextWord) {
+    var prev = (prevWord || "").toLowerCase().replace(/[.,;:!?«»"'()…—–]/g, "");
+    var next = (nextWord || "").toLowerCase().replace(/[.,;:!?«»"'()…—–]/g, "");
+    if (!prev || !next) return { kind: "none" };
+    if (prev === ET_TRIGGER) return { kind: "interdite", reason: "après « et »" };
+    if (next.charAt(0) === "h" && H_ASPIRE.has(next)) return { kind: "interdite", reason: "h aspiré" };
+    if (!isVowelStart(nextWord)) return { kind: "none" };
+    var c = endsConsForLiaison(prev);
+    if (!c) return { kind: "none" };
+    if (OBL_TRIGGER.has(prev)) return { kind: "obligatoire", sound: linkSound(c), reason: "déterminant / pronom obligatoire" };
+    // Some adjectives before noun → obligatoire (petit, grand, bon, beau, vieux, mauvais)
+    if (["petit","grand","bon","beau","vieux","mauvais","gros","long"].indexOf(prev) >= 0) {
+      return { kind: "obligatoire", sound: linkSound(c), reason: "adjectif court + nom" };
+    }
+    // Otherwise facultative (verb + complement, prep + noun etc.)
+    return { kind: "facultative", sound: linkSound(c), reason: "registre soutenu" };
+  }
+
+  function renderLiaison() {
+    var inp = document.getElementById("liz-input");
+    var raw = (inp.value || "").trim();
+    var out = document.getElementById("liz-readout");
+    if (!raw) { out.innerHTML = '<p class="muted">Tapez une phrase au-dessus.</p>'; return; }
+    var tokens = raw.split(/(\s+)/); // keep whitespace tokens for output
+    var words = raw.split(/\s+/).filter(Boolean);
+    var html = '<p class="liz-out" lang="fr">';
+    var w = 0;
+    for (var i = 0; i < tokens.length; i++) {
+      var tok = tokens[i];
+      if (/^\s+$/.test(tok)) {
+        // Decide liaison between prev word (words[w-1]) and next word (words[w]).
+        if (w >= 1 && w < words.length) {
+          var lk = liaisonKind(words[w - 1], words[w]);
+          if (lk.kind === "obligatoire") {
+            html += ' <span class="liaison-link liaison-ob" title="Obligatoire — ' + lk.reason + '"><span class="liaison-arc">‿</span><sub>/' + lk.sound + '/</sub></span> ';
+          } else if (lk.kind === "facultative") {
+            html += ' <span class="liaison-link liaison-fac" title="Facultative — ' + lk.reason + '"><span class="liaison-arc">‿</span><sub>/' + lk.sound + '/</sub></span> ';
+          } else if (lk.kind === "interdite") {
+            html += ' <span class="liaison-link liaison-int" title="Interdite — ' + lk.reason + '">⊘</span> ';
+          } else {
+            html += tok;
+          }
+        } else {
+          html += tok;
+        }
+      } else {
+        html += '<span class="liz-word">' + tok + '</span>';
+        w++;
+      }
+    }
+    html += '</p>';
+    html += '<div class="liz-legend">' +
+      '<span class="liaison-ob">obligatoire</span>' +
+      '<span class="liaison-fac">facultative</span>' +
+      '<span class="liaison-int">interdite</span></div>';
+    out.innerHTML = html;
+  }
+  function initLiaison() {
+    var inp = document.getElementById("liz-input");
+    if (!inp) return;
+    inp.addEventListener("input", renderLiaison);
+    document.querySelectorAll("[data-jump-liz]").forEach(function (b) {
+      b.addEventListener("click", function () { inp.value = b.dataset.jumpLiz; renderLiaison(); });
+    });
+    inp.value = "Les enfants vont en classe.";
+    renderLiaison();
+  }
+
   /* ───────── boot ───────── */
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
@@ -591,5 +791,7 @@
     initDateTime();
     initAccents();
     initIPA();
+    initGender();
+    initLiaison();
   }
 })();

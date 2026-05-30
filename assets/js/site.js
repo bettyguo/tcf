@@ -110,6 +110,29 @@
     updateBar();
   }
 
+  /* ───────────── Back-to-top button (long prose) ───────────── */
+  if (article && article.offsetHeight > window.innerHeight * 1.6) {
+    var btt = document.createElement("button");
+    btt.type = "button";
+    btt.className = "back-to-top";
+    btt.setAttribute("aria-label", "Back to top");
+    btt.title = "Back to top";
+    btt.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    document.body.appendChild(btt);
+    btt.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    });
+    var bttRaf = false;
+    window.addEventListener("scroll", function () {
+      if (bttRaf) return;
+      bttRaf = true;
+      requestAnimationFrame(function () {
+        bttRaf = false;
+        btt.classList.toggle("is-visible", window.scrollY > window.innerHeight * 0.6);
+      });
+    }, { passive: true });
+  }
+
   /* ───────────── Copy-code buttons on <pre> ─────────────────── */
   document.querySelectorAll(".prose pre").forEach(function (pre) {
     if (pre.parentElement && pre.parentElement.classList.contains("code-block-wrap")) return;
@@ -197,7 +220,8 @@
   var COMMANDS = [
     { title: "Practice", desc: "Diagnostic, vocab SRS, dictée, writing, reading", icon: "play", url: "/practice/", group: "Pages", keywords: "drills exercises srs flashcards" },
     { title: "Learner studio", desc: "NCLC explorer, exam tabs, mock timer, trajectory", icon: "book", url: "/learn/", group: "Pages", keywords: "interactive nclc" },
-    { title: "Mechanics toolkit", desc: "Verb conjugator, numbers, dates, accent helper, IPA chart", icon: "settings", url: "/tools/", group: "Pages", keywords: "conjugation verbes nombres dates ipa accents" },
+    { title: "Mechanics toolkit", desc: "Verb conjugator, numbers, dates, accent helper, IPA chart, gender, liaison", icon: "settings", url: "/tools/", group: "Pages", keywords: "conjugation verbes nombres dates ipa accents genre liaison" },
+    { title: "Glossary", desc: "Jargon decoder — NCLC, CEFR, FSRS, IRT, FEI, κ, posterior, ADR", icon: "book", url: "/glossary/", group: "Pages", keywords: "definitions terms acronyms" },
     { title: "Try the readiness widget", desc: "Live demo of the readiness gate", icon: "play", url: "/try/", group: "Pages", keywords: "demo readiness gate ci interval" },
     { title: "Limitations", desc: "Twelve things this system does not promise", icon: "warn", url: "/LIMITATIONS/", group: "Pages", keywords: "honesty disclaimers" },
     { title: "Pedagogy dossier", desc: "Eight SLA principles, evidence, receipts", icon: "book", url: "/PEDAGOGY/", group: "Pages", keywords: "pedagogy sla evidence" },
@@ -379,6 +403,7 @@
       '    <tr><td>Try it</td><td><span class="kbd">g</span> <span class="kbd">t</span></td></tr>' +
       '    <tr><td>Learn studio</td><td><span class="kbd">g</span> <span class="kbd">l</span></td></tr>' +
       '    <tr><td>Tools (mechanics)</td><td><span class="kbd">g</span> <span class="kbd">o</span></td></tr>' +
+      '    <tr><td>Glossary</td><td><span class="kbd">g</span> <span class="kbd">g</span></td></tr>' +
       '    <tr><td>Close any overlay</td><td><span class="kbd">esc</span></td></tr>' +
       '  </tbody></table>' +
       '  <button class="kbd-modal-close" type="button">Close</button>' +
@@ -413,14 +438,15 @@
       if (hm) hm.remove();
       return;
     }
-    // g-prefix shortcuts: gh, gp, gt, gl
-    if (e.key === "g") { lastG = Date.now(); return; }
+    // g-prefix shortcuts: gh, gp, gt, gl, gg (glossary), etc.
+    // Check pending prefix BEFORE setting a new one so g+g works.
     if (lastG && (Date.now() - lastG) < 1100) {
-      var targets = { h: "/", p: "/practice/", t: "/try/", l: "/learn/", a: "/adrs/", s: "/search/", o: "/tools/" };
+      var targets = { h: "/", p: "/practice/", t: "/try/", l: "/learn/", a: "/adrs/", s: "/search/", o: "/tools/", g: "/glossary/" };
       var t = targets[e.key.toLowerCase()];
-      if (t) { e.preventDefault(); window.location.href = (window.SITE_BASE || "") + t; }
+      if (t) { e.preventDefault(); window.location.href = (window.SITE_BASE || "") + t; lastG = 0; return; }
       lastG = 0;
     }
+    if (e.key === "g") { lastG = Date.now(); return; }
   });
 
   /* ───────────── Landing quick-quiz ("What's my level?") ──── */

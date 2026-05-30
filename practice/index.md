@@ -246,6 +246,12 @@ body_class: page-practice
       <div class="stat-tile-val" data-stat="total-min-2">0</div>
     </div>
   </div>
+  <div class="leech-panel" id="leech-panel" hidden>
+    <h4>Leeches — cards your ease has dropped below 1.5</h4>
+    <p class="demo-note" style="margin-top:-4px;">These cards keep tripping you. Common causes: bad mnemonic, ambiguous meaning, or interference with a similar word. The system surfaces them so you can rebuild a hook (write the example sentence longhand, or pair the card with a personal anecdote) instead of just grinding through them again.</p>
+    <ul class="leech-list" id="leech-list"></ul>
+  </div>
+
   <div class="stats-actions">
     <button class="btn btn-secondary" id="stats-export">Export JSON</button>
     <button class="btn btn-secondary" id="stats-import">Import JSON…</button>
