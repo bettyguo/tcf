@@ -5,6 +5,7 @@ eyebrow: "French training tools"
 subtitle: "Six real, browser-only French drills. No backend, no account — your progress is saved locally. Diagnostic quiz that gives you a starting NCLC estimate, SRS vocabulary, listening dictation, timed writing (with autosave), reading speed test, and a verb-conjugation drill."
 scripts:
   - /assets/js/practice.js
+  - /assets/js/extra-drills.js
 body_class: page-practice
 ---
 
@@ -23,6 +24,8 @@ body_class: page-practice
   <a href="#writing">④ Timed writing</a>
   <a href="#reading">⑤ Reading speed</a>
   <a href="#conjugation">⑥ Conjugation drill</a>
+  <a href="#cloze">⑦ Sentence cloze</a>
+  <a href="#numbers">⑧ Number listening</a>
   <a href="#stats" class="ml-auto">Your stats</a>
 </nav>
 
@@ -250,6 +253,84 @@ body_class: page-practice
 
   <p class="demo-note">Grading is accent-aware: missing accents are marked "diacritic" (half credit) instead of "wrong". The grader strips trailing pronouns from imperatives. If you need the full paradigm reference, the <a href="{{ '/tools/#conjugator' | relative_url }}">conjugator</a> in /tools/ is one tab away.</p>
 </section>
+
+---
+
+## ⑦ Sentence cloze — one blank, real grammar {#cloze}
+
+> 40 hand-authored items targeting the failure points TCF graders flag most often: subjunctive triggers (B2 fault line), connectors (cohérence textuelle, EE rubric), prepositions, past-participle agreement, and Express-Entry-flavoured admin language. Accent-tolerant grading, with the rule explained on every miss.
+
+<section class="learn-card cloze-card" data-tool="cloze">
+  <div class="cloze-controls">
+    <label for="cz-tag">Focus</label>
+    <select id="cz-tag" class="select">
+      <option value="all">All categories (40)</option>
+      <option value="connector">Connectors</option>
+      <option value="subjunctive">Subjunctive triggers</option>
+      <option value="preposition">Prepositions</option>
+      <option value="agreement">Past-participle agreement</option>
+      <option value="article">Articles / partitives</option>
+      <option value="pronoun">Pronouns</option>
+      <option value="civic">Express Entry / civic</option>
+      <option value="idiom">C1 idioms</option>
+    </select>
+    <div class="cloze-counters">
+      <span class="cloze-counter"><strong id="cz-correct">0</strong>correct</span>
+      <span class="cloze-counter"><strong id="cz-wrong">0</strong>wrong</span>
+      <span class="cloze-counter"><strong id="cz-streak">0</strong>streak</span>
+    </div>
+  </div>
+
+  <div class="cloze-intro" id="cz-intro">
+    <p>Each item shows a sentence with one word missing. Type the missing word, press <strong>Enter</strong> to check. Press <strong>▶ Listen</strong> to hear the sentence (with your guess if you've typed one). Accents are nice-to-have, not required.</p>
+    <button class="btn btn-primary" id="cz-start">Start cloze drill</button>
+  </div>
+
+  <div class="cloze-stage" id="cz-stage" aria-live="polite"></div>
+</section>
+
+<p class="demo-note">The 40 items aren't randomly authored — they target the eight categories the EE rubric grades against: <em>cohérence textuelle</em> (connectors), <em>maîtrise grammaticale</em> (subjunctive, agreement), and <em>lexique</em> (prepositions, idioms). Each item explains <em>why</em> on the explanation slide, not just <em>what</em>.</p>
+
+---
+
+## ⑧ Number listening — beat the CO ambush {#numbers}
+
+> Numbers, dates, and prices are the most common single-play CO trap on the TCF Canada. <em>Quatre-vingt-quinze</em>, <em>soixante-douze euros cinquante</em>, <em>dix-huit heures quarante-cinq</em> — each takes one beat for a native, three for a B1 ear. This drill plays a number via your device's French TTS and asks you to type the digits.
+
+<section class="learn-card numdrill-card" data-tool="numdrill">
+  <div class="numdrill-controls">
+    <div>
+      <label class="nclc-control-label" for="nd-range">Range</label>
+      <select id="nd-range" class="select">
+        <option value="69">0–69 (no quatre-vingt-)</option>
+        <option value="99" selected>0–99 (full)</option>
+        <option value="999">0–999</option>
+        <option value="9999">0–9 999</option>
+        <option value="999999">0–999 999</option>
+      </select>
+    </div>
+    <div class="nclc-quick-jumps nd-mode-chips" role="radiogroup" aria-label="Drill mode">
+      <label class="chip is-primary"><input type="radio" name="nd-mode" value="int" checked> Integer</label>
+      <label class="chip"><input type="radio" name="nd-mode" value="time"> Time (hh:mm)</label>
+      <label class="chip"><input type="radio" name="nd-mode" value="money"> Money (€)</label>
+    </div>
+    <span class="numdrill-range">Active: <span class="ndr-active" id="nd-range-active">0–99</span></span>
+    <div class="cloze-counters" style="margin-left:auto">
+      <span class="cloze-counter"><strong id="nd-correct">0</strong>correct</span>
+      <span class="cloze-counter"><strong id="nd-wrong">0</strong>wrong</span>
+      <span class="cloze-counter"><strong id="nd-streak">0</strong>streak</span>
+    </div>
+  </div>
+
+  <div class="cloze-intro" id="nd-intro">
+    <p>Tap <strong>▶</strong> to hear a French number, then type what you heard. Press <strong>Enter</strong> to check, <strong>Ctrl/⌘ + space</strong> to replay. Time mode accepts <code>18:45</code>, <code>1845</code>, or <code>18h45</code>. Money mode accepts <code>12,50</code> or <code>12.50</code>. <strong>The drill auto-advances</strong> after every answer.</p>
+    <button class="btn btn-primary" id="nd-start">Start number drill</button>
+  </div>
+
+  <div class="numdrill-stage" id="nd-stage" aria-live="polite"></div>
+</section>
+
+<p class="demo-note">Why this matters: on the real TCF Canada CO, audio plays exactly once (ADR-029). A number you can't decode in real time costs you the whole item — and CO items with numbers are over-represented in the practical-life cluster (train departures, prices, addresses, phone fragments). 5 minutes a day on this drill closes the gap fast because numbers are a small, finite ear-training space.</p>
 
 ---
 

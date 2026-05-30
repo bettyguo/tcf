@@ -136,6 +136,45 @@
           </header>
         {%- endunless -%}
         {{ content }}
+
+        {%- comment -%}
+          Prev/Next doc nav. Only rendered when the current page URL is
+          present in site.doc_sequence — keeps the footer off pages where
+          the curated sequence makes no sense (landing, interactive tools).
+        {%- endcomment -%}
+        {%- assign cur_idx = -1 -%}
+        {%- for d in site.doc_sequence -%}
+          {%- if d.url == page.url -%}{%- assign cur_idx = forloop.index0 -%}{%- endif -%}
+        {%- endfor -%}
+        {%- if cur_idx >= 0 -%}
+          {%- assign prev_idx = cur_idx | minus: 1 -%}
+          {%- assign next_idx = cur_idx | plus: 1 -%}
+          {%- assign last_idx = site.doc_sequence | size | minus: 1 -%}
+          <nav class="doc-nav" aria-label="Document navigation">
+            {%- if prev_idx >= 0 -%}
+              {%- assign prev = site.doc_sequence[prev_idx] -%}
+              <a class="doc-nav-link is-prev" href="{{ prev.url | relative_url }}">
+                <span class="doc-nav-dir">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8H3M7 4L3 8l4 4"/></svg>
+                  Previous
+                </span>
+                <span class="doc-nav-title">{{ prev.title }}</span>
+              </a>
+            {%- else -%}
+              <span></span>
+            {%- endif -%}
+            {%- if next_idx <= last_idx -%}
+              {%- assign nxt = site.doc_sequence[next_idx] -%}
+              <a class="doc-nav-link is-next" href="{{ nxt.url | relative_url }}">
+                <span class="doc-nav-dir">
+                  Next
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+                </span>
+                <span class="doc-nav-title">{{ nxt.title }}</span>
+              </a>
+            {%- endif -%}
+          </nav>
+        {%- endif -%}
       </article>
     {%- endif -%}
   </main>

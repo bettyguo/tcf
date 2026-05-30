@@ -118,6 +118,22 @@ footer:
       - { title: "Contributing", url: "https://github.com/bettyguo/tcf/blob/main/CONTRIBUTING.md" }
       - { title: "Security disclosure", url: "/SECURITY/" }
 
+# Curated doc reading sequence — drives the prev/next nav at the bottom of
+# canonical doc pages. URL must match the page's canonical path. A page not
+# in this list simply doesn't render the prev/next footer.
+doc_sequence:
+  - { url: /LIMITATIONS/,                  title: "Limitations" }
+  - { url: /LEARNER_GUIDE/,                title: "Learner guide" }
+  - { url: /PEDAGOGY/,                     title: "Pedagogy dossier" }
+  - { url: /ARCHITECTURE/,                 title: "Architecture" }
+  - { url: /OPERATIONS/,                   title: "Operations runbook" }
+  - { url: /LAUNCH_READINESS_REPORT/,      title: "Launch readiness report" }
+  - { url: /RISK_REGISTER/,                title: "Risk register" }
+  - { url: /adrs/,                         title: "All 48 ADRs" }
+  - { url: /CHANGELOG/,                    title: "Changelog" }
+  - { url: /SECURITY/,                     title: "Security disclosure" }
+  - { url: /glossary/,                     title: "Glossary" }
+
 # Files / directories Jekyll must NOT process.
 exclude:
   - .venv/

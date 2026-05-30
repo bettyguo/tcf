@@ -211,6 +211,8 @@
   var COMMANDS = [
     { title: "Practice", desc: "Diagnostic, vocab SRS, dictée, writing, reading, conjugation drill", icon: "play", url: "/practice/", group: "Pages", keywords: "drills exercises srs flashcards" },
     { title: "Conjugation drill", desc: "24 verbs × 6 tenses · accent-tolerant grading", icon: "play", url: "/practice/#conjugation", group: "Drills", keywords: "verbs conjugate paradigm subjunctive imparfait conditional drill" },
+    { title: "Sentence cloze", desc: "40 fill-in-the-blank items · subjunctive triggers, connectors, prepositions", icon: "play", url: "/practice/#cloze", group: "Drills", keywords: "cloze blank gap fill subjunctive connectors prepositions agreement grammar" },
+    { title: "Number listening", desc: "Hear French numbers · integer · time · money · up to 999 999", icon: "play", url: "/practice/#numbers", group: "Drills", keywords: "numbers nombres chiffres listening dictation time money soixante quatre-vingt" },
     { title: "Listening dictée", desc: "Single-play TCF cadence with word-level diff", icon: "play", url: "/practice/#listening", group: "Drills", keywords: "co compréhension orale listening dictation" },
     { title: "Timed writing (EE)", desc: "Real clock + register coach + autosave", icon: "play", url: "/practice/#writing", group: "Drills", keywords: "ee expression écrite essay writing tâche" },
     { title: "Reading speed (CE)", desc: "WPM + comprehension grading", icon: "play", url: "/practice/#reading", group: "Drills", keywords: "ce compréhension écrite reading wpm" },
@@ -218,6 +220,7 @@
     { title: "Diagnostic placement", desc: "8 calibrated items → per-skill NCLC + CI", icon: "play", url: "/practice/#diagnostic", group: "Drills", keywords: "placement diagnostic nclc" },
     { title: "Learner studio", desc: "NCLC explorer, exam tabs, mock timer, trajectory", icon: "book", url: "/learn/", group: "Pages", keywords: "interactive nclc" },
     { title: "Mechanics toolkit", desc: "Verb conjugator, numbers, dates, accent helper, IPA chart, gender, liaison", icon: "settings", url: "/tools/", group: "Pages", keywords: "conjugation verbes nombres dates ipa accents genre liaison" },
+    { title: "Score converter (NCLC ↔ CEFR ↔ TCF)", desc: "All four scales at once — IRCC reference equivalencies", icon: "layers", url: "/tools/#converter", group: "Drills", keywords: "score converter nclc cefr tcf level equivalency benchmark" },
     { title: "Glossary", desc: "Jargon decoder — NCLC, CEFR, FSRS, IRT, FEI, κ, posterior, ADR", icon: "book", url: "/glossary/", group: "Pages", keywords: "definitions terms acronyms" },
     { title: "Try the readiness widget", desc: "Live demo of the readiness gate", icon: "play", url: "/try/", group: "Pages", keywords: "demo readiness gate ci interval" },
     { title: "Limitations", desc: "Twelve things this system does not promise", icon: "warn", url: "/LIMITATIONS/", group: "Pages", keywords: "honesty disclaimers" },
@@ -558,6 +561,126 @@
     if (typeof navigator.onLine === "boolean" && !navigator.onLine) show();
   })();
 
+  /* ───────────── Header streak chip (global progress nudge) ────
+   * Reads tcf.practice.history from localStorage and renders a small chip
+   * next to the theme toggle when there's any practice activity. Updates
+   * live via the storage event so /practice/ updates roll over in other tabs.
+   * Hidden via CSS if no streak (no flashing 0).
+   * ─────────────────────────────────────────────────────────── */
+  (function () {
+    function lsRead(key) {
+      try { var v = localStorage.getItem("tcf.practice." + key); return v == null ? null : JSON.parse(v); }
+      catch (e) { return null; }
+    }
+    function todayISO() { return new Date().toISOString().slice(0, 10); }
+    function computeStreak() {
+      var hist = lsRead("history") || {};
+      var d = new Date(); var streak = 0;
+      for (var i = 0; i < 730; i++) {
+        var key = d.toISOString().slice(0, 10);
+        if ((hist[key] || 0) > 0) { streak++; d.setDate(d.getDate() - 1); }
+        else if (i === 0) { d.setDate(d.getDate() - 1); continue; }
+        else break;
+      }
+      return streak;
+    }
+    var chip = document.createElement("a");
+    chip.className = "streak-chip";
+    chip.href = pathJoin("/practice/#stats");
+    chip.setAttribute("aria-label", "Your practice streak");
+    chip.setAttribute("title", "Your practice streak — open stats");
+    var nav = document.querySelector(".site-nav");
+    if (nav && themeToggle) nav.insertBefore(chip, themeToggle);
+    else if (nav) nav.appendChild(chip);
+
+    function render() {
+      var hist = lsRead("history") || {};
+      var streak = computeStreak();
+      var todayMin = Math.round(hist[todayISO()] || 0);
+      if (streak <= 0 && todayMin <= 0) {
+        chip.classList.remove("is-active", "is-today");
+        return;
+      }
+      chip.classList.add("is-active");
+      chip.classList.toggle("is-today", todayMin > 0);
+      var label = streak > 0
+        ? '<span class="flame" aria-hidden="true">🔥</span><span class="sc-n">' + streak + '</span>'
+        : '<span class="flame" aria-hidden="true">✦</span><span class="sc-n">0</span>';
+      if (todayMin > 0) label += '<span class="sc-min">' + todayMin + ' min</span>';
+      chip.innerHTML = label;
+    }
+    render();
+    window.addEventListener("storage", function (e) {
+      if (!e.key || e.key.indexOf("tcf.practice.") === 0) render();
+    });
+    // Re-render every 60s in case the user crosses midnight while the tab is open.
+    setInterval(render, 60 * 1000);
+    window.tcfRenderStreak = render;
+  })();
+
+  /* ───────────── Scroll-reveal entrance animations ──────────
+   * Auto-applies to landing sections and grid cards. No-op when the
+   * IntersectionObserver isn't available; CSS handles reduced-motion.
+   * ─────────────────────────────────────────────────────── */
+  (function () {
+    if (!("IntersectionObserver" in window)) return;
+    // Auto-tag common building blocks on landing pages.
+    var selectors = [
+      ".hero-text",
+      ".hero-visual",
+      ".section-head",
+      ".section .card",
+      ".section .audience-card",
+      ".section .practice-extra-link",
+      ".receipt-card",
+      ".phrase-card"
+    ];
+    selectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el, idx) {
+        if (el.hasAttribute("data-reveal")) return;
+        el.setAttribute("data-reveal", "");
+        if (idx > 0 && idx < 5) el.setAttribute("data-reveal-delay", String(idx));
+      });
+    });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add("is-revealed");
+          io.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -60px 0px", threshold: 0.08 });
+    document.querySelectorAll("[data-reveal]").forEach(function (el) { io.observe(el); });
+  })();
+
+  /* ───────────── Hover-prefetch internal links ──────────────
+   * On pointerover, inject a <link rel="prefetch"> for the target.
+   * Speeds up perceived nav. Only same-origin, only HTML.
+   * ─────────────────────────────────────────────────────── */
+  (function () {
+    var prefetched = {};
+    function prefetch(href) {
+      if (!href || prefetched[href]) return;
+      if (href.indexOf("://") >= 0 && href.indexOf(location.origin) !== 0) return;
+      if (/\.(png|jpg|jpeg|gif|svg|webp|pdf|zip)(\?|#|$)/i.test(href)) return;
+      prefetched[href] = true;
+      var l = document.createElement("link");
+      l.rel = "prefetch";
+      l.href = href;
+      l.as = "document";
+      document.head.appendChild(l);
+    }
+    document.addEventListener("pointerover", function (e) {
+      var a = e.target && e.target.closest && e.target.closest("a[href]");
+      if (!a) return;
+      var href = a.getAttribute("href");
+      if (!href || href.charAt(0) === "#" || href.indexOf("mailto:") === 0) return;
+      // Resolve relative.
+      try { var u = new URL(a.href); if (u.origin !== location.origin) return; prefetch(u.pathname + u.search); }
+      catch (e2) {}
+    }, { passive: true });
+  })();
+
   /* ───────────── PWA service-worker registration ──────────── */
   if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
     window.addEventListener("load", function () {
@@ -565,20 +688,50 @@
       var scope = (window.SITE_BASE || "") + "/";
       navigator.serviceWorker.register(swUrl, { scope: scope })
         .then(function (reg) {
-          // If an update is found, prompt it to activate.
           if (!reg) return;
+          // If there's already a waiting worker, prompt to update right away.
+          if (reg.waiting && navigator.serviceWorker.controller) showSwUpdateToast(reg);
           reg.addEventListener("updatefound", function () {
             var nw = reg.installing;
             if (!nw) return;
             nw.addEventListener("statechange", function () {
               if (nw.state === "installed" && navigator.serviceWorker.controller) {
-                // A fresh SW is ready; tell it to take over on next load.
-                try { nw.postMessage({ type: "SKIP_WAITING" }); } catch (e) {}
+                showSwUpdateToast(reg);
               }
             });
           });
         })
         .catch(function () { /* SW optional */ });
+
+      // After the new SW takes control, reload once so the page matches assets.
+      var reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (reloaded) return;
+        reloaded = true;
+        location.reload();
+      });
+    });
+  }
+  function showSwUpdateToast(reg) {
+    if (document.querySelector(".sw-update-toast")) return;
+    var t = document.createElement("div");
+    t.className = "sw-update-toast";
+    t.setAttribute("role", "status");
+    t.innerHTML =
+      '<span class="swu-msg"><strong>Update available.</strong> A newer version of the site is ready.</span>' +
+      '<button class="sw-update-btn" type="button">Reload</button>' +
+      '<button class="sw-update-dismiss" type="button" aria-label="Dismiss">×</button>';
+    document.body.appendChild(t);
+    requestAnimationFrame(function () { t.classList.add("is-visible"); });
+    t.querySelector(".sw-update-btn").addEventListener("click", function () {
+      try { if (reg && reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" }); }
+      catch (e) {}
+      // controllerchange listener above will trigger reload.
+      setTimeout(function () { location.reload(); }, 800);
+    });
+    t.querySelector(".sw-update-dismiss").addEventListener("click", function () {
+      t.classList.remove("is-visible");
+      setTimeout(function () { t.remove(); }, 250);
     });
   }
 })();

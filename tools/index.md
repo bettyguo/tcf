@@ -6,6 +6,7 @@ subtitle: "Five quick browser-only utilities for the high-frequency French mecha
 description: "French mechanics toolkit: verb conjugator (top 32 verbs · 7 tenses), number-to-French, date and time builder, accent helper, IPA phoneme chart with TTS."
 scripts:
   - /assets/js/tools.js
+  - /assets/js/converter.js
 body_class: page-tools
 ---
 
@@ -25,6 +26,7 @@ body_class: page-tools
   <a href="#ipa">⑤ IPA phoneme chart</a>
   <a href="#gender">⑥ Gender helper</a>
   <a href="#liaison">⑦ Liaison preview</a>
+  <a href="#converter">⑧ Score converter</a>
 </nav>
 
 ## ① Verb conjugator — 32 essential verbs × 7 tenses {#conjugator}
@@ -215,6 +217,16 @@ body_class: page-tools
   </div>
   <p class="demo-note">Obligatoires (in green): article + noun (<em>les_amis</em>), pronoun + verb (<em>nous_avons</em>), monosyllabic prepositions (<em>en_avance</em>). Interdites (in red): before an <em>h aspiré</em> (<em>les / hibou</em>, no liaison), after <em>et</em>, before some proper nouns. Facultatives (in yellow): in careful speech but commonly dropped (<em>vous êtes_arrivés</em>). The rule list is heuristic and won't cover every edge case — but it gets the 90 % that show up in TCF dictées.</p>
 </section>
+
+## ⑧ Score converter — NCLC ↔ CEFR ↔ TCF raw {#converter}
+
+> The single most common question I get from learners: <em>"My CO is 415 — is that NCLC 7?"</em> This widget answers it both ways. Pick your input scale (NCLC, CEFR, TCF reception /699, or TCF production 1–6), and see all four equivalents at once. The source-of-truth scale is highlighted; the rest are derived from the publicly documented IRCC equivalency chart.
+
+<section class="learn-card conv-card" data-tool="conv" id="conv-card">
+  <p class="muted">Loading converter…</p>
+</section>
+
+<p class="demo-note">The mapping is the public IRCC reference chart. Real TCF scoring is administered and certified by FEI. Use this as orientation when reading a score report (e.g. confirming your CE 470 is enough for NCLC 8) or when reading a public corpus that labels passages by CEFR (e.g. a B2 passage maps to NCLC 8). For the system's own use of NCLC bands and credible intervals, see <a href="{{ '/PEDAGOGY/' | relative_url }}">PEDAGOGY</a>.</p>
 
 ---
 

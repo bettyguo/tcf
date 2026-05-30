@@ -2,6 +2,8 @@
 layout: landing
 title: tcf-accel
 description: "Open-source, evidence-based French training for the TCF Canada. B1 → NCLC 7–9 in 12 weeks. Honest, audited, self-hostable. v1.0.0."
+scripts:
+  - /assets/js/phrase.js
 ---
 
 <section class="hero">
@@ -68,6 +70,17 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
           <span class="pill">all confident</span>
         </div>
       </aside>
+    </div>
+  </div>
+</section>
+
+<section class="phrase-section">
+  <div class="container">
+    <div id="phrase-of-the-day" aria-live="polite">
+      <article class="phrase-card" aria-label="Phrase du jour" style="min-height:220px;">
+        <div class="phrase-head"><span class="phrase-eyebrow">Phrase du jour</span></div>
+        <p class="phrase-fr" lang="fr">Chargement…</p>
+      </article>
     </div>
   </div>
 </section>
