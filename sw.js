@@ -12,7 +12,7 @@ permalink: /sw.js
  *   - Cap each cache bucket. Skip cross-origin / non-GET / Web Speech.
  *   - Per-URL precache adds (cache.addAll is atomic; one 404 kills it).
  */
-const VERSION = "tcf-1.0.5";
+const VERSION = "tcf-1.0.6";
 const CORE = "tcf-core-" + VERSION;
 const ASSETS = "tcf-assets-" + VERSION;
 const PAGES = "tcf-pages-" + VERSION;
@@ -36,6 +36,8 @@ const CORE_URLS = [
   "{{ '/assets/js/learn.js' | relative_url }}",
   "{{ '/assets/js/practice.js' | relative_url }}",
   "{{ '/assets/js/extra-drills.js' | relative_url }}",
+  "{{ '/assets/js/more-drills.js' | relative_url }}",
+  "{{ '/assets/js/achievements.js' | relative_url }}",
   "{{ '/assets/js/tools.js' | relative_url }}",
   "{{ '/assets/js/converter.js' | relative_url }}",
   "{{ '/assets/js/search.js' | relative_url }}",

@@ -143,6 +143,32 @@
       '  </div>' +
       '</article>';
 
+    // Render a small daily-focus card below the phrase. Rotates by day,
+    // surfaces a specific drill to start with. Uses the same date index.
+    var FOCUS = [
+      { icon: "🎯", label: "Diagnostic placement", desc: "8 calibrated items · 10 min · per-skill NCLC + CI", url: "/practice/#diagnostic" },
+      { icon: "🔁", label: "Conjugation drill", desc: "24 verbs × 6 tenses · accent-tolerant", url: "/practice/#conjugation" },
+      { icon: "🎧", label: "Listening dictée", desc: "Single-play TCF cadence · word-level diff", url: "/practice/#listening" },
+      { icon: "📚", label: "Vocab SRS", desc: "10 cards / 5 min · the daily compounding win", url: "/practice/#vocab" },
+      { icon: "✍",  label: "Timed writing (EE)", desc: "T1 or T2 prompt · live word count · 25 min", url: "/practice/#writing" },
+      { icon: "📖", label: "Sentence cloze", desc: "8 items · subjunctive + connectors · 10 min", url: "/practice/#cloze" },
+      { icon: "👀", label: "Speed reading (RSVP)", desc: "One B2 passage · push WPM up · 8 min", url: "/practice/#rsvp" }
+    ];
+    var focusIdx = indexForDate(new Date()) % FOCUS.length;
+    var f = FOCUS[focusIdx];
+    var pjoin = (window.tcfPathJoin || function (u) { return (window.SITE_BASE || "") + u; });
+    var fHtml =
+      '<a class="focus-card" href="' + pjoin(f.url) + '">' +
+      '  <span class="focus-card-icon" aria-hidden="true">' + f.icon + '</span>' +
+      '  <span class="focus-card-body">' +
+      '    <p class="focus-card-eyebrow">Today\'s focus</p>' +
+      '    <p class="focus-card-title">' + f.label + '</p>' +
+      '    <p class="focus-card-meta">' + f.desc + '</p>' +
+      '  </span>' +
+      '  <span class="focus-card-cta">Start →</span>' +
+      '</a>';
+    host.insertAdjacentHTML("beforeend", fHtml);
+
     var fr = host.querySelector(".phrase-fr");
     var en = host.querySelector(".phrase-en");
     var playBtn = host.querySelector("#phrase-play");

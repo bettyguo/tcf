@@ -28,13 +28,16 @@
   function todayISO() { return new Date().toISOString().slice(0, 10); }
   function markPractice(minutes) {
     // Prefer the practice.js implementation if exposed; otherwise mirror it.
-    if (typeof window.tcfMarkPractice === "function") { window.tcfMarkPractice(minutes); return; }
-    var hist = lsGet("history", {});
-    var t = todayISO();
-    hist[t] = (hist[t] || 0) + Math.max(0, minutes || 0);
-    lsSet("history", hist);
-    lsSet("sessions", lsGet("sessions", 0) + 1);
-    if (typeof window.tcfRenderStreak === "function") window.tcfRenderStreak();
+    if (typeof window.tcfMarkPractice === "function") { window.tcfMarkPractice(minutes); }
+    else {
+      var hist = lsGet("history", {});
+      var t = todayISO();
+      hist[t] = (hist[t] || 0) + Math.max(0, minutes || 0);
+      lsSet("history", hist);
+      lsSet("sessions", lsGet("sessions", 0) + 1);
+      if (typeof window.tcfRenderStreak === "function") window.tcfRenderStreak();
+    }
+    if (typeof window.tcfCheckAchievements === "function") window.tcfCheckAchievements();
   }
   function findFrenchVoice() {
     if (!("speechSynthesis" in window)) return null;

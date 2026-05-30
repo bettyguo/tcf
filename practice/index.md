@@ -6,6 +6,8 @@ subtitle: "Six real, browser-only French drills. No backend, no account — your
 scripts:
   - /assets/js/practice.js
   - /assets/js/extra-drills.js
+  - /assets/js/more-drills.js
+  - /assets/js/achievements.js
 body_class: page-practice
 ---
 
@@ -26,6 +28,8 @@ body_class: page-practice
   <a href="#conjugation">⑥ Conjugation drill</a>
   <a href="#cloze">⑦ Sentence cloze</a>
   <a href="#numbers">⑧ Number listening</a>
+  <a href="#rsvp">⑨ Speed reading</a>
+  <a href="#voicerec">⑩ Voice recorder</a>
   <a href="#stats" class="ml-auto">Your stats</a>
 </nav>
 
@@ -334,6 +338,74 @@ body_class: page-practice
 
 ---
 
+## ⑨ Speed reading — RSVP + comprehension {#rsvp}
+
+> Rapid Serial Visual Presentation flashes one word (or short chunk) at a time at a target words-per-minute, forcing your eyes to stop saccading. Six hand-authored passages span B1 → C1; each one is followed by a 3-question comprehension check. The aim: hit the T4 target of ≥150 WPM <em>with</em> ≥2/3 comprehension before you book the exam.
+
+<section class="learn-card rsvp-card" data-tool="rsvp">
+  <div class="rsvp-controls-row">
+    <div>
+      <label class="nclc-control-label" for="rs-level">Level</label>
+      <select id="rs-level" class="select">
+        <option value="B1">B1 — newcomer scenarios</option>
+        <option value="B2" selected>B2 — opinion + analysis</option>
+        <option value="C1">C1 — argumentative</option>
+      </select>
+    </div>
+    <div>
+      <label class="nclc-control-label" for="rs-chunk">Chunk</label>
+      <select id="rs-chunk" class="select">
+        <option value="1" selected>1 word</option>
+        <option value="2">2 words</option>
+        <option value="3">3 words</option>
+      </select>
+    </div>
+    <div class="rsvp-wpm-wrap">
+      <label class="nclc-control-label" for="rs-wpm">Target WPM · <span class="rsvp-wpm-num" id="rs-wpm-val">280</span></label>
+      <input type="range" id="rs-wpm" min="120" max="500" step="20" value="280" aria-label="Target words per minute">
+    </div>
+  </div>
+
+  <div class="rsvp-intro" id="rs-intro">
+    <p>Press <strong>Start</strong> to flash a passage one chunk at a time. <strong>Space</strong> pauses, <strong>Esc</strong> stops early and jumps to the quiz. After the read, three multiple-choice questions check whether you actually parsed it — speed without comprehension is just scrolling.</p>
+    <button class="btn btn-primary" id="rs-start">Start the RSVP →</button>
+  </div>
+
+  <div class="rsvp-stage" id="rs-stage" aria-live="polite"></div>
+</section>
+
+<p class="demo-note">Why chunking matters: native readers parse 2–3 word groups per fixation by default. Training with chunk=2 or 3 once the 1-word reading is stable transfers more cleanly to normal CE prose. Don't push WPM past comprehension — the "+20 WPM next time" button only earns its keep if comprehension stayed ≥2/3 this round.</p>
+
+---
+
+## ⑩ Voice recorder — hear yourself out {#voicerec}
+
+> The cheapest, most underused EO drill: record your monologue, listen back, hear the pauses and hesitations you don't notice while speaking. Audio stays in your browser — nothing is uploaded, nothing is sent. The rubric checkboxes are for honest self-rating, not a score.
+
+<section class="learn-card voicerec-card" data-tool="voicerec">
+  <div class="rsvp-controls-row">
+    <div>
+      <label class="nclc-control-label" for="vr-prompt">Prompt</label>
+      <select id="vr-prompt" class="select">
+        <option value="t1_intro">T1 (60s) — self-introduction</option>
+        <option value="t2_describe">T2 (90s) — narrate a trip</option>
+        <option value="t3_argue">T3 (120s) — defend an opinion</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="voicerec-intro" id="vr-intro">
+    <p>The recorder uses your browser's microphone (you'll be asked once). Audio is stored in memory and never leaves the page — close the tab and it's gone. The 60–120 second cap matches the real TCF EO tasks; the VU meter helps you check your mic level before you start.</p>
+    <button class="btn btn-primary" id="vr-start-gate">Open the recorder →</button>
+  </div>
+
+  <div class="voicerec-stage" id="vr-stage" aria-live="polite"></div>
+</section>
+
+<p class="demo-note">Privacy: the audio is a local Blob bound to a URL.createObjectURL handle. It's not written to disk, not sent over the network, not retained when the tab closes. The MediaRecorder API requires a secure context (https or localhost); on http you'll see a microphone-denied toast. The recorder won't run in Safari without WebKit's MediaRecorder fallback — Chrome / Edge / Firefox all work.</p>
+
+---
+
 ## Your stats {#stats}
 
 <section class="learn-card stats-card" data-tool="stats">
@@ -381,6 +453,11 @@ body_class: page-practice
   </div>
   <div class="stats-import-row">
     <p class="demo-note">All stats live in <code>localStorage</code> under the <code>tcf.practice.*</code> namespace. Exported JSON is a single, hashable file — move between browsers, share with a tutor, or feed it to your own dashboard. Import expects the same shape (validated client-side; bad files are rejected).</p>
+  </div>
+
+  <div class="ach-host" data-achievements>
+    <div class="ach-head"><h4>Achievements</h4><span class="ach-count">0 / 13</span></div>
+    <div class="ach-grid"><span class="muted small">No data yet — start a drill above.</span></div>
   </div>
 </section>
 
