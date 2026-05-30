@@ -2,7 +2,7 @@
 layout: default
 title: "Practice"
 eyebrow: "French training tools"
-subtitle: "Five real, browser-only French drills. No backend, no account — your progress is saved locally. Diagnostic quiz that gives you a starting NCLC estimate, SRS vocabulary, listening dictation, timed writing, and a reading speed test."
+subtitle: "Six real, browser-only French drills. No backend, no account — your progress is saved locally. Diagnostic quiz that gives you a starting NCLC estimate, SRS vocabulary, listening dictation, timed writing (with autosave), reading speed test, and a verb-conjugation drill."
 scripts:
   - /assets/js/practice.js
 body_class: page-practice
@@ -22,6 +22,7 @@ body_class: page-practice
   <a href="#listening">③ Listening dictée</a>
   <a href="#writing">④ Timed writing</a>
   <a href="#reading">⑤ Reading speed</a>
+  <a href="#conjugation">⑥ Conjugation drill</a>
   <a href="#stats" class="ml-auto">Your stats</a>
 </nav>
 
@@ -215,6 +216,41 @@ body_class: page-practice
   <div class="read-result" id="read-result" hidden></div>
 </section>
 
+## ⑥ Conjugation drill — the EE/EO bottleneck mechanic {#conjugation}
+
+> Every B1 → B2 jump runs through the conditional, subjunctive, and the irregular passé-composé auxiliaries. This is a fast-fire drill: the system picks a verb, tense and pronoun; you type the form. Accent-tolerant grading; SM-2 ease tracks the verbs you keep missing. Press <span class="kbd">⏎</span> to submit, <span class="kbd">esc</span> to reveal.
+
+<section class="learn-card conj-drill-card" data-tool="conjdrill">
+  <div class="conj-drill-controls">
+    <label for="cd-tense">Tenses in pool</label>
+    <div class="cd-tense-pool" id="cd-tense-pool" role="group" aria-label="Tenses included in the drill">
+      <label><input type="checkbox" value="présent" checked> présent</label>
+      <label><input type="checkbox" value="passé_composé" checked> passé composé</label>
+      <label><input type="checkbox" value="imparfait" checked> imparfait</label>
+      <label><input type="checkbox" value="futur_simple" checked> futur simple</label>
+      <label><input type="checkbox" value="conditionnel" checked> conditionnel</label>
+      <label><input type="checkbox" value="subjonctif"> subjonctif</label>
+    </div>
+    <div class="cd-meta">
+      <span class="cd-counter"><strong id="cd-correct">0</strong> correct</span>
+      <span class="cd-counter cd-counter-wrong"><strong id="cd-wrong">0</strong> missed</span>
+      <span class="cd-counter cd-counter-streak"><strong id="cd-streak">0</strong> streak</span>
+    </div>
+  </div>
+
+  <div class="conj-drill-stage" id="cd-stage">
+    <p class="muted">Pick at least one tense above and press <strong>Start</strong>.</p>
+  </div>
+
+  <div class="cd-actions">
+    <button class="btn btn-primary" id="cd-start">Start drill</button>
+    <button class="btn btn-secondary" id="cd-reveal" disabled>Reveal (esc)</button>
+    <button class="btn btn-ghost" id="cd-reset">Reset score</button>
+  </div>
+
+  <p class="demo-note">Grading is accent-aware: missing accents are marked "diacritic" (half credit) instead of "wrong". The grader strips trailing pronouns from imperatives. If you need the full paradigm reference, the <a href="{{ '/tools/#conjugator' | relative_url }}">conjugator</a> in /tools/ is one tab away.</p>
+</section>
+
 ---
 
 ## Your stats {#stats}
@@ -244,6 +280,10 @@ body_class: page-practice
     <div class="stat-tile">
       <div class="stat-tile-label">Total practice minutes</div>
       <div class="stat-tile-val" data-stat="total-min-2">0</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile-label">Conjugation drill — correct / total</div>
+      <div class="stat-tile-val" data-stat="cd-ratio">0 / 0</div>
     </div>
   </div>
   <div class="leech-panel" id="leech-panel" hidden>

@@ -398,7 +398,8 @@
     html += '<div class="diag-result-cta">';
     html += '  <p><strong>Suggested next moves:</strong></p>';
     html += '  <ul>';
-    html += '    <li>Focus the next two weeks on <strong>' + bottleneck + '</strong> — the ' + (bottleneck === "EE" || bottleneck === "EO" ? "β=" + (bottleneck === "EO" ? "1.5" : "1.4") + " production over-weight" : "reception drills") + ' is documented in <a href="' + (window.SITE_BASE || "") + '/PEDAGOGY/">PEDAGOGY §1</a>.</li>';
+    var pjoin = window.tcfPathJoin || function (u) { return (window.SITE_BASE || "") + u; };
+    html += '    <li>Focus the next two weeks on <strong>' + bottleneck + '</strong> — the ' + (bottleneck === "EE" || bottleneck === "EO" ? "β=" + (bottleneck === "EO" ? "1.5" : "1.4") + " production over-weight" : "reception drills") + ' is documented in <a href="' + pjoin('/PEDAGOGY/') + '">PEDAGOGY §1</a>.</li>';
     html += '    <li>Use the <a href="#vocab">SRS deck</a> to lift CE/CO ceiling. 240 cards at 10/day = 24 days to full deck.</li>';
     html += '    <li>One <a href="#listening">dictée</a> + one <a href="#writing">writing prompt</a> per day. Production minutes beat passive minutes.</li>';
     html += '  </ul>';
@@ -818,12 +819,18 @@
     });
     srsUpdateCounters(srsCurrentDeck());
     srsNext();
-    // Mark practice when leaving srs session (5+ cards reviewed).
-    window.addEventListener("beforeunload", function () {
-      if (srsState.started) {
-        var mins = Math.round((Date.now() - srsState.started) / 60000);
-        if (mins > 0) markPractice(mins);
-      }
+    // Mark practice when leaving srs session. `pagehide` fires reliably on
+    // mobile + tab close, unlike `beforeunload`. Reset the start clock after
+    // crediting so a long-open session can't be double-counted.
+    function creditSrsSession() {
+      if (!srsState.started) return;
+      var mins = Math.round((Date.now() - srsState.started) / 60000);
+      srsState.started = Date.now();
+      if (mins > 0) markPractice(mins);
+    }
+    window.addEventListener("pagehide", creditSrsSession);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") creditSrsSession();
     });
   }
 
@@ -1089,6 +1096,61 @@
     document.getElementById("write-reset").addEventListener("click", wReset);
     document.getElementById("write-textarea").addEventListener("input", wRecount);
     wNewPrompt();
+
+    /* ── Autosave + restore ───────────────────────────────────
+     * Persist every 1.5 s (debounced) under a per-task key so refresh,
+     * tab close, or accidental reset doesn't wipe in-flight EE work.
+     * On first paint, if there's a non-trivial saved draft, surface it
+     * with a one-tap restore (avoids surprise overwrites).
+     */
+    var WRITE_DRAFT_KEY = "write-draft";
+    var ta = document.getElementById("write-textarea");
+    var autosaveTimer = null;
+    function autosaveDraft() {
+      try {
+        var v = ta.value;
+        if (!v) { lsDel(WRITE_DRAFT_KEY); return; }
+        lsSet(WRITE_DRAFT_KEY, { task: wState.task, ts: Date.now(), text: v });
+      } catch (e) {}
+    }
+    ta.addEventListener("input", function () {
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(autosaveDraft, 1500);
+    });
+    window.addEventListener("pagehide", autosaveDraft);
+    // Offer to restore.
+    var draft = lsGet(WRITE_DRAFT_KEY, null);
+    if (draft && draft.text && draft.text.trim().length >= 40) {
+      var banner = document.createElement("div");
+      banner.className = "write-restore";
+      var when = new Date(draft.ts || Date.now());
+      var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+      var dateStr = when.toLocaleDateString() + " · " + pad(when.getHours()) + ":" + pad(when.getMinutes());
+      var wc = (draft.text.trim().match(/\S+/g) || []).length;
+      banner.innerHTML =
+        '<p><strong>Restore your draft?</strong> ' + wc + ' words saved ' + dateStr +
+        ' (Tâche ' + (draft.task || "?") + ').</p>' +
+        '<div class="write-restore-actions">' +
+        '  <button class="btn btn-primary" type="button" data-w-restore>Restore</button>' +
+        '  <button class="btn btn-ghost" type="button" data-w-discard>Discard</button>' +
+        '</div>';
+      var wcard = document.querySelector(".write-card");
+      if (wcard) wcard.insertBefore(banner, wcard.firstChild);
+      banner.querySelector("[data-w-restore]").addEventListener("click", function () {
+        if (draft.task) {
+          document.getElementById("write-task").value = draft.task;
+          wNewPrompt();
+        }
+        ta.value = draft.text;
+        wRecount();
+        banner.remove();
+        if (window.tcfToast) window.tcfToast("Draft restored — " + wc + " words");
+      });
+      banner.querySelector("[data-w-discard]").addEventListener("click", function () {
+        lsDel(WRITE_DRAFT_KEY);
+        banner.remove();
+      });
+    }
   }
 
   /* ───────────────────────────────────────────────────────────
@@ -1200,6 +1262,266 @@
   }
 
   /* ───────────────────────────────────────────────────────────
+   * ⑥ Conjugation drill
+   * Random verb × tense × pronoun → user types the form.
+   * Accent-tolerant; SM-2-style ease per verb so the picker
+   * over-weights the verbs you keep missing.
+   * ───────────────────────────────────────────────────────── */
+
+  // Inline mini-paradigm set. Subset of /tools/ but with the canonical forms
+  // pre-computed for tense × person; keeps drill JS self-contained.
+  var CD_VERBS = [
+    { fr:"être",    p:["suis","es","est","sommes","êtes","sont"],          pc:"été",   aux:"avoir", im:"ét",     fs:"ser",     sj:["sois","sois","soit","soyons","soyez","soient"] },
+    { fr:"avoir",   p:["ai","as","a","avons","avez","ont"],                pc:"eu",    aux:"avoir", im:"av",     fs:"aur",     sj:["aie","aies","ait","ayons","ayez","aient"] },
+    { fr:"aller",   p:["vais","vas","va","allons","allez","vont"],         pc:"allé",  aux:"être",  im:"all",    fs:"ir",      sj:["aille","ailles","aille","allions","alliez","aillent"] },
+    { fr:"faire",   p:["fais","fais","fait","faisons","faites","font"],    pc:"fait",  aux:"avoir", im:"fais",   fs:"fer",     sj:["fasse","fasses","fasse","fassions","fassiez","fassent"] },
+    { fr:"dire",    p:["dis","dis","dit","disons","dites","disent"],       pc:"dit",   aux:"avoir", im:"dis",    fs:"dir",     sj:["dise","dises","dise","disions","disiez","disent"] },
+    { fr:"pouvoir", p:["peux","peux","peut","pouvons","pouvez","peuvent"], pc:"pu",    aux:"avoir", im:"pouv",   fs:"pourr",   sj:["puisse","puisses","puisse","puissions","puissiez","puissent"] },
+    { fr:"vouloir", p:["veux","veux","veut","voulons","voulez","veulent"], pc:"voulu", aux:"avoir", im:"voul",   fs:"voudr",   sj:["veuille","veuilles","veuille","voulions","vouliez","veuillent"] },
+    { fr:"devoir",  p:["dois","dois","doit","devons","devez","doivent"],   pc:"dû",    aux:"avoir", im:"dev",    fs:"devr",    sj:["doive","doives","doive","devions","deviez","doivent"] },
+    { fr:"savoir",  p:["sais","sais","sait","savons","savez","savent"],    pc:"su",    aux:"avoir", im:"sav",    fs:"saur",    sj:["sache","saches","sache","sachions","sachiez","sachent"] },
+    { fr:"voir",    p:["vois","vois","voit","voyons","voyez","voient"],    pc:"vu",    aux:"avoir", im:"voy",    fs:"verr",    sj:["voie","voies","voie","voyions","voyiez","voient"] },
+    { fr:"venir",   p:["viens","viens","vient","venons","venez","viennent"], pc:"venu", aux:"être", im:"ven",    fs:"viendr",  sj:["vienne","viennes","vienne","venions","veniez","viennent"] },
+    { fr:"prendre", p:["prends","prends","prend","prenons","prenez","prennent"], pc:"pris", aux:"avoir", im:"pren", fs:"prendr", sj:["prenne","prennes","prenne","prenions","preniez","prennent"] },
+    { fr:"mettre",  p:["mets","mets","met","mettons","mettez","mettent"],  pc:"mis",   aux:"avoir", im:"mett",   fs:"mettr",   sj:["mette","mettes","mette","mettions","mettiez","mettent"] },
+    { fr:"croire",  p:["crois","crois","croit","croyons","croyez","croient"], pc:"cru", aux:"avoir", im:"croy",   fs:"croir",   sj:["croie","croies","croie","croyions","croyiez","croient"] },
+    { fr:"écrire",  p:["écris","écris","écrit","écrivons","écrivez","écrivent"], pc:"écrit", aux:"avoir", im:"écriv", fs:"écrir", sj:["écrive","écrives","écrive","écrivions","écriviez","écrivent"] },
+    { fr:"lire",    p:["lis","lis","lit","lisons","lisez","lisent"],       pc:"lu",    aux:"avoir", im:"lis",    fs:"lir",     sj:["lise","lises","lise","lisions","lisiez","lisent"] },
+    { fr:"vivre",   p:["vis","vis","vit","vivons","vivez","vivent"],       pc:"vécu",  aux:"avoir", im:"viv",    fs:"vivr",    sj:["vive","vives","vive","vivions","viviez","vivent"] },
+    { fr:"recevoir",p:["reçois","reçois","reçoit","recevons","recevez","reçoivent"], pc:"reçu", aux:"avoir", im:"recev", fs:"recevr", sj:["reçoive","reçoives","reçoive","recevions","receviez","reçoivent"] },
+    { fr:"sortir",  p:["sors","sors","sort","sortons","sortez","sortent"], pc:"sorti", aux:"être",  im:"sort",   fs:"sortir",  sj:["sorte","sortes","sorte","sortions","sortiez","sortent"] },
+    { fr:"partir",  p:["pars","pars","part","partons","partez","partent"], pc:"parti", aux:"être",  im:"part",   fs:"partir",  sj:["parte","partes","parte","partions","partiez","partent"] },
+    { fr:"finir",   p:["finis","finis","finit","finissons","finissez","finissent"], pc:"fini", aux:"avoir", im:"finiss", fs:"finir", sj:["finisse","finisses","finisse","finissions","finissiez","finissent"] },
+    { fr:"parler",  p:["parle","parles","parle","parlons","parlez","parlent"], pc:"parlé", aux:"avoir", im:"parl", fs:"parler", sj:["parle","parles","parle","parlions","parliez","parlent"] },
+    { fr:"choisir", p:["choisis","choisis","choisit","choisissons","choisissez","choisissent"], pc:"choisi", aux:"avoir", im:"choisiss", fs:"choisir", sj:["choisisse","choisisses","choisisse","choisissions","choisissiez","choisissent"] },
+    { fr:"ouvrir",  p:["ouvre","ouvres","ouvre","ouvrons","ouvrez","ouvrent"], pc:"ouvert", aux:"avoir", im:"ouvr", fs:"ouvrir", sj:["ouvre","ouvres","ouvre","ouvrions","ouvriez","ouvrent"] }
+  ];
+
+  var CD_PRONOUNS = [
+    { i:0, label:"je / j'", english:"I" },
+    { i:1, label:"tu",      english:"you (informal)" },
+    { i:2, label:"il / elle", english:"he / she" },
+    { i:3, label:"nous",    english:"we" },
+    { i:4, label:"vous",    english:"you (plural / formal)" },
+    { i:5, label:"ils / elles", english:"they" }
+  ];
+
+  function cdAuxForms(verb) {
+    return verb.aux === "être"
+      ? ["suis","es","est","sommes","êtes","sont"]
+      : ["ai","as","a","avons","avez","ont"];
+  }
+  function cdFormFor(verb, tense, pIdx) {
+    switch (tense) {
+      case "présent":        return verb.p[pIdx];
+      case "imparfait":      return verb.im + (["ais","ais","ait","ions","iez","aient"][pIdx]);
+      case "futur_simple":   return verb.fs + (["ai","as","a","ons","ez","ont"][pIdx]);
+      case "conditionnel":   return verb.fs + (["ais","ais","ait","ions","iez","aient"][pIdx]);
+      case "subjonctif":     return verb.sj[pIdx];
+      case "passé_composé":  return cdAuxForms(verb)[pIdx] + " " + verb.pc;
+    }
+    return "";
+  }
+  function cdPrettyPronoun(verb, tense, pIdx) {
+    // Elide je → j' if next word starts with vowel.
+    var pron = CD_PRONOUNS[pIdx].label.split(" / ")[0];
+    if (pIdx !== 0) return pron;
+    var first;
+    if (tense === "passé_composé") first = cdAuxForms(verb)[0].charAt(0);
+    else first = (cdFormFor(verb, tense, 0) || "").charAt(0);
+    var vowels = ["a","e","i","o","u","é","è","ê","â","î","ô","û","h"];
+    if (vowels.indexOf(first.toLowerCase()) >= 0) return "j'";
+    return "je";
+  }
+  function cdNormalize(s) {
+    return (s || "").toLowerCase().trim()
+      .replace(/\s+/g, " ")
+      .replace(/[.,;:!?…«»"'()—–]/g, "");
+  }
+  function cdStripAccents(s) {
+    return cdNormalize(s).normalize("NFD").replace(/[̀-ͯ]/g, "");
+  }
+
+  var cd = {
+    running: false, item: null, correct: 0, wrong: 0, streak: 0,
+    ease: lsGet("cd-ease", {}), revealed: false
+  };
+
+  function cdEnabledTenses() {
+    var pool = document.getElementById("cd-tense-pool");
+    if (!pool) return ["présent"];
+    var out = [];
+    pool.querySelectorAll("input[type=checkbox]:checked").forEach(function (c) { out.push(c.value); });
+    return out;
+  }
+
+  function cdPick() {
+    var tenses = cdEnabledTenses();
+    if (!tenses.length) return null;
+    // Weighted pick by 1/ease so harder verbs come up more often.
+    var weighted = CD_VERBS.map(function (v) {
+      var e = cd.ease[v.fr] != null ? cd.ease[v.fr] : 2.5;
+      return { v: v, w: Math.max(0.4, 3.0 - e) };
+    });
+    var total = weighted.reduce(function (a, b) { return a + b.w; }, 0);
+    var r = Math.random() * total;
+    var acc = 0, picked = weighted[0].v;
+    for (var i = 0; i < weighted.length; i++) {
+      acc += weighted[i].w;
+      if (r <= acc) { picked = weighted[i].v; break; }
+    }
+    var tense = tenses[Math.floor(Math.random() * tenses.length)];
+    var pIdx = Math.floor(Math.random() * 6);
+    // Skip defective forms safely (none in this subset).
+    return { verb: picked, tense: tense, pIdx: pIdx, expected: cdFormFor(picked, tense, pIdx) };
+  }
+
+  function cdRender() {
+    var stage = document.getElementById("cd-stage");
+    if (!stage) return;
+    if (!cd.item) {
+      stage.innerHTML = '<p class="muted">Press <strong>Start drill</strong> to begin.</p>';
+      return;
+    }
+    var it = cd.item;
+    var tenseLabel = ({
+      "présent": "Présent",
+      "passé_composé": "Passé composé",
+      "imparfait": "Imparfait",
+      "futur_simple": "Futur simple",
+      "conditionnel": "Conditionnel présent",
+      "subjonctif": "Subjonctif présent"
+    })[it.tense];
+    var pronoun = cdPrettyPronoun(it.verb, it.tense, it.pIdx);
+    var lead = pronoun === "j'" ? "j'" : pronoun + " ";
+    var html = '';
+    html += '<div class="cd-prompt">';
+    html += '  <div class="cd-prompt-meta"><span class="cd-pill">' + tenseLabel + '</span><span class="cd-verb-name">' + it.verb.fr + '</span></div>';
+    html += '  <p class="cd-prompt-lead">' + lead + '<span class="cd-prompt-blank">________</span></p>';
+    html += '  <input type="text" class="cd-input" id="cd-input" lang="fr" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text" placeholder="Tape ta réponse…" aria-label="Conjugated form" />';
+    html += '  <div class="cd-prompt-feedback" id="cd-feedback" aria-live="polite"></div>';
+    html += '</div>';
+    stage.innerHTML = html;
+    var inp = document.getElementById("cd-input");
+    inp.focus();
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); cdSubmit(); }
+      else if (e.key === "Escape") { e.preventDefault(); cdReveal(); }
+    });
+  }
+
+  function cdAdjustEase(verbFr, correct, half) {
+    var prev = cd.ease[verbFr] != null ? cd.ease[verbFr] : 2.5;
+    var delta = correct ? (half ? 0.05 : 0.12) : -0.18;
+    cd.ease[verbFr] = Math.max(1.3, Math.min(3.0, prev + delta));
+    lsSet("cd-ease", cd.ease);
+  }
+
+  function cdSubmit() {
+    var it = cd.item;
+    var inp = document.getElementById("cd-input");
+    var fb = document.getElementById("cd-feedback");
+    if (!it || !inp || !fb) return;
+    var got = inp.value;
+    var expected = it.expected;
+    var gotN = cdNormalize(got);
+    var expN = cdNormalize(expected);
+    var verdict, cssClass;
+    if (gotN === expN) {
+      verdict = '<span class="cd-tick">✓</span> Bravo. <strong lang="fr">' + expected + '</strong>';
+      cssClass = "cd-correct";
+      cd.correct++; cd.streak++;
+      cdAdjustEase(it.verb.fr, true, false);
+    } else if (cdStripAccents(got) === cdStripAccents(expected)) {
+      verdict = '<span class="cd-half">≈</span> Presque — accent manquant. Attendu : <strong lang="fr">' + expected + '</strong>';
+      cssClass = "cd-half";
+      cd.correct++; cd.streak++;
+      cdAdjustEase(it.verb.fr, true, true);
+    } else {
+      verdict = '<span class="cd-cross">✗</span> Attendu : <strong lang="fr">' + expected + '</strong>';
+      cssClass = "cd-wrong";
+      cd.wrong++; cd.streak = 0;
+      cdAdjustEase(it.verb.fr, false);
+    }
+    fb.className = "cd-prompt-feedback " + cssClass;
+    fb.innerHTML = verdict + ' <button class="btn btn-secondary cd-next-btn" id="cd-next">Next →</button>';
+    inp.disabled = true;
+    cdUpdateScore();
+    document.getElementById("cd-next").addEventListener("click", cdNext);
+    document.getElementById("cd-next").focus();
+    // Allow Enter to advance.
+    document.addEventListener("keydown", cdEnterAdvance);
+  }
+  function cdEnterAdvance(e) {
+    if (e.key === "Enter" && document.getElementById("cd-next")) { e.preventDefault(); cdNext(); }
+  }
+  function cdReveal() {
+    var it = cd.item;
+    var fb = document.getElementById("cd-feedback");
+    if (!it || !fb) return;
+    cd.wrong++; cd.streak = 0;
+    cdAdjustEase(it.verb.fr, false);
+    fb.className = "cd-prompt-feedback cd-revealed";
+    fb.innerHTML = '<span class="cd-cross">○</span> Réponse : <strong lang="fr">' + it.expected + '</strong> <button class="btn btn-secondary cd-next-btn" id="cd-next">Next →</button>';
+    var inp = document.getElementById("cd-input");
+    if (inp) inp.disabled = true;
+    cdUpdateScore();
+    document.getElementById("cd-next").addEventListener("click", cdNext);
+    document.addEventListener("keydown", cdEnterAdvance);
+  }
+  function cdNext() {
+    document.removeEventListener("keydown", cdEnterAdvance);
+    cd.item = cdPick();
+    cdRender();
+  }
+  function cdStart() {
+    if (!cdEnabledTenses().length) {
+      if (window.tcfToast) window.tcfToast("Pick at least one tense");
+      return;
+    }
+    cd.running = true;
+    cd.item = cdPick();
+    cd.startedAt = Date.now();
+    document.getElementById("cd-reveal").disabled = false;
+    document.getElementById("cd-start").textContent = "Restart";
+    cdRender();
+  }
+  function cdReset() {
+    cd.correct = 0; cd.wrong = 0; cd.streak = 0;
+    cd.ease = {};
+    lsSet("cd-ease", {});
+    cdUpdateScore();
+    if (window.tcfToast) window.tcfToast("Score reset");
+  }
+  function cdUpdateScore() {
+    var c = document.getElementById("cd-correct");
+    var w = document.getElementById("cd-wrong");
+    var s = document.getElementById("cd-streak");
+    if (c) c.textContent = cd.correct;
+    if (w) w.textContent = cd.wrong;
+    if (s) s.textContent = cd.streak;
+  }
+
+  if (document.getElementById("cd-start")) {
+    document.getElementById("cd-start").addEventListener("click", cdStart);
+    document.getElementById("cd-reveal").addEventListener("click", function () {
+      var btn = document.getElementById("cd-next");
+      if (btn) return;
+      cdReveal();
+    });
+    document.getElementById("cd-reset").addEventListener("click", cdReset);
+    cdUpdateScore();
+    // Credit drill minutes on hide.
+    window.addEventListener("pagehide", function () {
+      if (cd.startedAt) {
+        var mins = Math.round((Date.now() - cd.startedAt) / 60000);
+        cd.startedAt = Date.now();
+        if (mins > 0) markPractice(mins);
+      }
+    });
+  }
+
+  /* ───────────────────────────────────────────────────────────
    * Stats panel
    * ───────────────────────────────────────────────────────── */
 
@@ -1228,6 +1550,11 @@
         var wpms = rhist.map(function (r) { return r.wpm; }).sort(function (a, b) { return a - b; });
         wpmEl.textContent = wpms[Math.floor(wpms.length / 2)] + " wpm";
       } else wpmEl.textContent = "—";
+    }
+    var cdRatio = document.querySelector('[data-stat="cd-ratio"]');
+    if (cdRatio) {
+      var total = (cd.correct || 0) + (cd.wrong || 0);
+      cdRatio.textContent = (cd.correct || 0) + " / " + total;
     }
     renderLeeches(srs);
   }

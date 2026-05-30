@@ -137,10 +137,10 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
 <section class="section">
   <div class="container">
     <div class="section-head">
-      <p class="section-eyebrow">Interactive — five real drills</p>
+      <p class="section-eyebrow">Interactive — six real drills</p>
       <h2>Train in your browser, today, for free.</h2>
       <p class="section-lede">
-        The practice page bundles a diagnostic placement, an SM-2 spaced-repetition vocabulary deck (241 cards), a single-play listening dictée with word-level diff, a timed EE writing pad, and a reading-speed test with comprehension grading. No backend, no signup, your progress lives in your browser.
+        The practice page bundles a diagnostic placement, an SM-2 spaced-repetition vocabulary deck (241 cards), a single-play listening dictée with word-level diff, a timed EE writing pad with autosave, a reading-speed test with comprehension grading, and a verb-conjugation drill (24 verbs × 6 tenses) with accent-tolerant grading. No backend, no signup, your progress lives in your browser.
       </p>
     </div>
     <div class="grid grid-3">
@@ -185,13 +185,25 @@ description: "Open-source, evidence-based French training for the TCF Canada. B1
         </a>
       </article>
       <article class="card">
-        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg></span>
-        <h3>Your stats</h3>
-        <p>Streak heatmap, total minutes, vocab learned, dictée pass rate, median WPM. All in <code>localStorage</code>. Exportable JSON.</p>
-        <a class="card-link" href="{{ '/practice/#stats' | relative_url }}">View dashboard
+        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h16"/><circle cx="19" cy="12" r="2"/></svg></span>
+        <h3>⑥ Conjugation drill</h3>
+        <p>24 high-frequency verbs × 6 tenses including subjunctive and conditional. Accent-tolerant grading; weak verbs come up more often.</p>
+        <a class="card-link" href="{{ '/practice/#conjugation' | relative_url }}">Run the drill
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
         </a>
       </article>
+    </div>
+    <div class="practice-extras">
+      <a class="practice-extra-link" href="{{ '/practice/#stats' | relative_url }}">
+        <span class="extra-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg></span>
+        <span class="extra-text"><strong>Your stats dashboard</strong><span>Streak heatmap, 30-day sparkline, leech list, JSON export · all in <code>localStorage</code></span></span>
+        <span class="extra-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+      </a>
+      <a class="practice-extra-link" href="{{ '/LEARNER_GUIDE/' | relative_url }}">
+        <span class="extra-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></span>
+        <span class="extra-text"><strong>12-week learner guide</strong><span>Week-by-week plan: which drills, what minutes, what to expect. Pair with the practice page above.</span></span>
+        <span class="extra-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+      </a>
     </div>
   </div>
 </section>

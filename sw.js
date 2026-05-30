@@ -4,20 +4,24 @@ sitemap: false
 permalink: /sw.js
 ---
 /* tcf-accel service worker.
+ *
  * Strategy:
- *   - HTML: network-first with cache fallback (so updates ship immediately).
+ *   - HTML/navigation: network-first with cache fallback, then offline shell.
  *   - CSS/JS/fonts/images: stale-while-revalidate.
  *   - JSON (search index, audit data): stale-while-revalidate.
- *   - Cap cache size to 80 entries.
- *   - Skip Web Speech API / cross-origin / non-GET.
+ *   - Cap each cache bucket. Skip cross-origin / non-GET / Web Speech.
+ *   - Per-URL precache adds (cache.addAll is atomic; one 404 kills it).
  */
-const VERSION = "tcf-1.0.3";
+const VERSION = "tcf-1.0.4";
 const CORE = "tcf-core-" + VERSION;
 const ASSETS = "tcf-assets-" + VERSION;
 const PAGES = "tcf-pages-" + VERSION;
 
+const ROOT = "{{ '/' | relative_url }}";
+const OFFLINE_SHELL = ROOT; // landing page renders without JS; safe fallback.
+
 const CORE_URLS = [
-  "{{ '/' | relative_url }}",
+  ROOT,
   "{{ '/practice/' | relative_url }}",
   "{{ '/learn/' | relative_url }}",
   "{{ '/tools/' | relative_url }}",
@@ -33,13 +37,18 @@ const CORE_URLS = [
   "{{ '/assets/js/tools.js' | relative_url }}",
   "{{ '/assets/js/search.js' | relative_url }}",
   "{{ '/assets/img/favicon.svg' | relative_url }}",
-  "{{ '/manifest.webmanifest' | relative_url }}"
+  "{{ '/manifest.webmanifest' | relative_url }}",
+  "{{ '/search-index.json' | relative_url }}"
 ];
 
+async function precache() {
+  const cache = await caches.open(CORE);
+  // Add per-URL so a single 404 doesn't abort the whole precache.
+  await Promise.allSettled(CORE_URLS.map((u) => cache.add(new Request(u, { cache: "reload" }))));
+}
+
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CORE).then((cache) => cache.addAll(CORE_URLS).catch(() => {}))
-  );
+  event.waitUntil(precache());
   self.skipWaiting();
 });
 
@@ -59,22 +68,36 @@ async function capCache(name, max) {
   }
 }
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // HTML: network-first.
+  // HTML/navigation: network-first → cached page → offline shell.
   const accept = req.headers.get("accept") || "";
   if (accept.includes("text/html") || req.mode === "navigate") {
-    event.respondWith(
-      fetch(req).then((resp) => {
-        const copy = resp.clone();
-        caches.open(PAGES).then((c) => { c.put(req, copy); capCache(PAGES, 40); });
+    event.respondWith((async () => {
+      try {
+        const resp = await fetch(req);
+        if (resp && resp.ok) {
+          const copy = resp.clone();
+          caches.open(PAGES).then((c) => { c.put(req, copy); capCache(PAGES, 40); });
+        }
         return resp;
-      }).catch(() => caches.match(req).then((c) => c || caches.match("{{ '/' | relative_url }}")))
-    );
+      } catch (e) {
+        const cached = await caches.match(req);
+        if (cached) return cached;
+        const shell = await caches.match(OFFLINE_SHELL);
+        return shell || new Response("Offline — open /practice/, /learn/, or /tools/ from your home screen to use cached drills.", {
+          status: 503, statusText: "Offline", headers: { "Content-Type": "text/plain; charset=utf-8" }
+        });
+      }
+    })());
     return;
   }
 

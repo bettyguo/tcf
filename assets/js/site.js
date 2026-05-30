@@ -59,34 +59,25 @@
   window.tcfToast = toast;
 
   /* ───────────── Site base for fetch URLs ──────────────────── */
-  // Try to detect baseurl by checking the canonical link.
-  var canon = document.querySelector('link[rel="canonical"]');
-  if (canon) {
-    var path = new URL(canon.href).pathname;
-    // The baseurl is everything before the page URL.
-    var pageUrl = window.location.pathname;
-    var base = "";
-    if (pageUrl !== path) {
-      // Different — assume canonical reflects the right base.
-      var idx = path.indexOf(pageUrl.split("/").filter(Boolean)[0] || "");
-      if (idx > 0) base = path.substring(0, idx).replace(/\/$/, "");
-    }
-    // Easier: grab any nav link starting with /xxx/ — its prefix is baseurl.
-    var anyNav = document.querySelector('.nav-link[href^="/"]');
-    if (anyNav) {
-      var href = anyNav.getAttribute("href");
-      // e.g. /tcf/practice/ → baseurl = /tcf
-      var parts = href.split("/").filter(Boolean);
-      if (parts.length > 1 && href.indexOf("/" + parts[0] + "/") === 0) {
-        // Could be either /tcf/practice/ or /practice/ depending on setup.
-        // Test: does the path actually start with /tcf?
-        if (window.location.pathname.indexOf("/" + parts[0]) === 0) {
-          base = "/" + parts[0];
-        }
-      }
-    }
-    window.SITE_BASE = base;
+  // The Jekyll layout already set window.SITE_BASE = "{{ site.baseurl }}".
+  // Trust it. Normalize to never end with a trailing slash so concatenation
+  // patterns like `SITE_BASE + "/foo/"` always produce a single slash.
+  if (typeof window.SITE_BASE === "string") {
+    window.SITE_BASE = window.SITE_BASE.replace(/\/+$/, "");
+  } else {
+    window.SITE_BASE = "";
   }
+  function pathJoin(url) {
+    // Join SITE_BASE with a site-relative URL, idempotently: if url already
+    // starts with the base, don't double-prefix it.
+    if (!url) return window.SITE_BASE || "/";
+    if (url.indexOf("://") >= 0) return url;
+    var base = window.SITE_BASE || "";
+    if (base && url.indexOf(base + "/") === 0) return url;
+    if (url.charAt(0) !== "/") url = "/" + url;
+    return base + url;
+  }
+  window.tcfPathJoin = pathJoin;
 
   /* ───────────── Reading progress bar (on prose pages) ─────── */
   var article = document.querySelector(".prose");
@@ -218,7 +209,13 @@
   /* ───────────── Command palette (Cmd/Ctrl+K) ──────────────── */
   // Static command index — always available. Page index is loaded lazily.
   var COMMANDS = [
-    { title: "Practice", desc: "Diagnostic, vocab SRS, dictée, writing, reading", icon: "play", url: "/practice/", group: "Pages", keywords: "drills exercises srs flashcards" },
+    { title: "Practice", desc: "Diagnostic, vocab SRS, dictée, writing, reading, conjugation drill", icon: "play", url: "/practice/", group: "Pages", keywords: "drills exercises srs flashcards" },
+    { title: "Conjugation drill", desc: "24 verbs × 6 tenses · accent-tolerant grading", icon: "play", url: "/practice/#conjugation", group: "Drills", keywords: "verbs conjugate paradigm subjunctive imparfait conditional drill" },
+    { title: "Listening dictée", desc: "Single-play TCF cadence with word-level diff", icon: "play", url: "/practice/#listening", group: "Drills", keywords: "co compréhension orale listening dictation" },
+    { title: "Timed writing (EE)", desc: "Real clock + register coach + autosave", icon: "play", url: "/practice/#writing", group: "Drills", keywords: "ee expression écrite essay writing tâche" },
+    { title: "Reading speed (CE)", desc: "WPM + comprehension grading", icon: "play", url: "/practice/#reading", group: "Drills", keywords: "ce compréhension écrite reading wpm" },
+    { title: "Vocab SRS", desc: "241-card SM-2 deck", icon: "play", url: "/practice/#vocab", group: "Drills", keywords: "srs vocabulary flashcards anki" },
+    { title: "Diagnostic placement", desc: "8 calibrated items → per-skill NCLC + CI", icon: "play", url: "/practice/#diagnostic", group: "Drills", keywords: "placement diagnostic nclc" },
     { title: "Learner studio", desc: "NCLC explorer, exam tabs, mock timer, trajectory", icon: "book", url: "/learn/", group: "Pages", keywords: "interactive nclc" },
     { title: "Mechanics toolkit", desc: "Verb conjugator, numbers, dates, accent helper, IPA chart, gender, liaison", icon: "settings", url: "/tools/", group: "Pages", keywords: "conjugation verbes nombres dates ipa accents genre liaison" },
     { title: "Glossary", desc: "Jargon decoder — NCLC, CEFR, FSRS, IRT, FEI, κ, posterior, ADR", icon: "book", url: "/glossary/", group: "Pages", keywords: "definitions terms acronyms" },
@@ -364,7 +361,7 @@
       if (it.action === "theme") { themeToggle && themeToggle.click(); return; }
       if (it.action === "help") { showHelpModal(); return; }
       if (it.external) { window.open(it.external, "_blank", "noopener"); return; }
-      if (it.url) window.location.href = (window.SITE_BASE || "") + it.url.replace(window.SITE_BASE || "", "");
+      if (it.url) window.location.href = pathJoin(it.url);
     }
 
     input.addEventListener("input", render);
@@ -404,6 +401,7 @@
       '    <tr><td>Learn studio</td><td><span class="kbd">g</span> <span class="kbd">l</span></td></tr>' +
       '    <tr><td>Tools (mechanics)</td><td><span class="kbd">g</span> <span class="kbd">o</span></td></tr>' +
       '    <tr><td>Glossary</td><td><span class="kbd">g</span> <span class="kbd">g</span></td></tr>' +
+      '    <tr><td>Conjugation drill</td><td><span class="kbd">g</span> <span class="kbd">c</span></td></tr>' +
       '    <tr><td>Close any overlay</td><td><span class="kbd">esc</span></td></tr>' +
       '  </tbody></table>' +
       '  <button class="kbd-modal-close" type="button">Close</button>' +
@@ -441,9 +439,9 @@
     // g-prefix shortcuts: gh, gp, gt, gl, gg (glossary), etc.
     // Check pending prefix BEFORE setting a new one so g+g works.
     if (lastG && (Date.now() - lastG) < 1100) {
-      var targets = { h: "/", p: "/practice/", t: "/try/", l: "/learn/", a: "/adrs/", s: "/search/", o: "/tools/", g: "/glossary/" };
+      var targets = { h: "/", p: "/practice/", t: "/try/", l: "/learn/", a: "/adrs/", s: "/search/", o: "/tools/", g: "/glossary/", c: "/practice/#conjugation" };
       var t = targets[e.key.toLowerCase()];
-      if (t) { e.preventDefault(); window.location.href = (window.SITE_BASE || "") + t; lastG = 0; return; }
+      if (t) { e.preventDefault(); window.location.href = pathJoin(t); lastG = 0; return; }
       lastG = 0;
     }
     if (e.key === "g") { lastG = Date.now(); return; }
@@ -495,10 +493,10 @@
         }
         var label = band < 0 ? "Below A2 — start from foundations" : levelMap[band];
         var path = band >= 2
-          ? '<a class="btn btn-primary" href="' + (window.SITE_BASE || "") + '/practice/#diagnostic">Take the 8-item placement</a><a class="btn btn-secondary" href="' + (window.SITE_BASE || "") + '/learn/">Open learner studio</a>'
+          ? '<a class="btn btn-primary" href="' + pathJoin('/practice/') + '#diagnostic">Take the 8-item placement</a><a class="btn btn-secondary" href="' + pathJoin('/learn/') + '">Open learner studio</a>'
           : band >= 0
-            ? '<a class="btn btn-primary" href="' + (window.SITE_BASE || "") + '/practice/">Start daily practice</a><a class="btn btn-secondary" href="' + (window.SITE_BASE || "") + '/tools/">Brush up mechanics</a>'
-            : '<a class="btn btn-primary" href="' + (window.SITE_BASE || "") + '/LEARNER_GUIDE/">Read the 12-week guide</a><a class="btn btn-secondary" href="' + (window.SITE_BASE || "") + '/tools/">Open the toolkit</a>';
+            ? '<a class="btn btn-primary" href="' + pathJoin('/practice/') + '">Start daily practice</a><a class="btn btn-secondary" href="' + pathJoin('/tools/') + '">Brush up mechanics</a>'
+            : '<a class="btn btn-primary" href="' + pathJoin('/LEARNER_GUIDE/') + '">Read the 12-week guide</a><a class="btn btn-secondary" href="' + pathJoin('/tools/') + '">Open the toolkit</a>';
         stage.innerHTML =
           '<div class="quickquiz-result">' +
           '  <span class="level-badge">' + label + '</span>' +
@@ -534,11 +532,52 @@
     render();
   })();
 
+  /* ───────────── Offline indicator ─────────────────────────── */
+  // Show a small chip when the browser reports the user has gone offline; hide
+  // when they come back. Cheap nudge that the PWA's cached content is still
+  // usable. Reduced-motion still gets the chip, just without slide animation.
+  (function () {
+    var chip = null;
+    function show() {
+      if (chip) return;
+      chip = document.createElement("div");
+      chip.className = "offline-chip";
+      chip.setAttribute("role", "status");
+      chip.innerHTML = '<span class="offline-dot" aria-hidden="true"></span> Offline · cached pages and drills still work';
+      document.body.appendChild(chip);
+      requestAnimationFrame(function () { chip.classList.add("is-visible"); });
+    }
+    function hide() {
+      if (!chip) return;
+      chip.classList.remove("is-visible");
+      var c = chip; chip = null;
+      setTimeout(function () { c.remove(); }, 320);
+    }
+    window.addEventListener("offline", show);
+    window.addEventListener("online", hide);
+    if (typeof navigator.onLine === "boolean" && !navigator.onLine) show();
+  })();
+
   /* ───────────── PWA service-worker registration ──────────── */
   if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
     window.addEventListener("load", function () {
-      var swUrl = (window.SITE_BASE || "") + "/sw.js";
-      navigator.serviceWorker.register(swUrl, { scope: (window.SITE_BASE || "") + "/" })
+      var swUrl = pathJoin("/sw.js");
+      var scope = (window.SITE_BASE || "") + "/";
+      navigator.serviceWorker.register(swUrl, { scope: scope })
+        .then(function (reg) {
+          // If an update is found, prompt it to activate.
+          if (!reg) return;
+          reg.addEventListener("updatefound", function () {
+            var nw = reg.installing;
+            if (!nw) return;
+            nw.addEventListener("statechange", function () {
+              if (nw.state === "installed" && navigator.serviceWorker.controller) {
+                // A fresh SW is ready; tell it to take over on next load.
+                try { nw.postMessage({ type: "SKIP_WAITING" }); } catch (e) {}
+              }
+            });
+          });
+        })
         .catch(function () { /* SW optional */ });
     });
   }

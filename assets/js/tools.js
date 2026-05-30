@@ -377,7 +377,7 @@
     if (n >= 200 && (n % 100 === 0)) return "Note: « " + N_UNITS[Math.floor(n / 100)] + " cents » — le « s » tombe si un autre nombre suit.";
     if (n === 81 || n === 91) return "Pas de « et » : « quatre-vingt-un / -onze ».";
     if (n === 71) return "Note: « soixante et onze » (avec « et »).";
-    if (n % 80 === 0 && n !== 0) return "Pas de « s » à « quatre-vingt » quand suivi d'un autre nombre (sinon « quatre-vingts »).";
+    if ((n % 100 === 80) && n !== 0) return "Pas de « s » à « quatre-vingt » quand suivi d'un autre nombre (sinon « quatre-vingts »).";
     if (n >= 1000 && n < 2000) return "Pour les dates < 2000 on dit aussi : « mil " + (n === 1000 ? "" : under1000(n - 1000)) + " » (variante historique).";
     return null;
   }
@@ -686,8 +686,9 @@
   // h aspiré words — liaison FORBIDDEN. Compact list of high-frequency ones.
   var H_ASPIRE = new Set([
     "hibou","haricot","hauteur","haine","handicap","hameau","hangar","hanche",
-    "harpe","hasard","hâte","hennir","hérisson","héros","hibou","hiérarchie",
-    "hockey","honte","hors","huit","hurler","hutte","haut","huitième","houx"
+    "harpe","hasard","hâte","hennir","hérisson","héros","hiérarchie",
+    "hockey","honte","hors","huit","hurler","hutte","haut","huitième","houx",
+    "hublot","hollande","homard","hibou","huitaine","huissier"
   ]);
   // Pronouns / determiners that trigger obligatoire liaison.
   var OBL_TRIGGER = new Set([
